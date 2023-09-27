@@ -19,9 +19,9 @@ export default function Login() {
             </View>
             <Button title="INJIRA" backgroundColor="#478CCA" textColor="white" />
             <View style={{ marginTop: 20 }}></View>
-            <Button title="UBUFASHA" backgroundColor="transparent" textColor="#3D576F" underlineText={true} />
+            <Button title="UBUFASHA" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.push('/help')}/>
             <View style={{ marginTop: 100 }}></View>
-            <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} />
+            <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
             <StatusBar style="auto" />
         </View>
     )

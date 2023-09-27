@@ -37,7 +37,7 @@ export default function Signup() {
             </View>
             <Button title="EMEZA" backgroundColor="#478CCA" textColor="white" />
             <View style={{ marginTop: 40 }}></View>
-            <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} />
+            <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
             <StatusBar style="auto" />
         </View>
     )

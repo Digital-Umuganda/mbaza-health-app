@@ -1,0 +1,36 @@
+.mt-10 {
+  margin-top: 2.5rem
+}
+
+.flex {
+  display: flex
+}
+
+.w-full {
+  width: 100%
+}
+
+.flex-1 {
+  flex: 1 1 0%
+}
+
+.items-center {
+  align-items: center
+}
+
+.justify-center {
+  justify-content: center
+}
+
+.self-center {
+  align-self: center
+}
+
+.p-4 {
+  padding: 1rem
+}
+
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity))
+}

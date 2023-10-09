@@ -22,6 +22,10 @@ export default function Home() {
         axios(config)
             .then(function (response) {
                 console.log({ data: response.data });
+                let data = response.data;
+                if (Array.isArray(data)) {
+                    data = data.reverse();
+                }
                 setChats(response.data);
             })
             .catch(function (error) {
@@ -35,13 +39,13 @@ export default function Home() {
 
     const Chat = ({ chat }) => {
         return (
-            <View style={{ backgroundColor: '#478CCA14', paddingHorizontal: 20, paddingVertical: 15 }}>
-                <Text style={{ fontSize: 14, color: '#3D576F' }}>{chat.title}</Text>
+            <TouchableOpacity onPress={() => router.push({ pathname: '/chat', params: { chatId: chat.id } })} style={{ backgroundColor: '#478CCA14', paddingHorizontal: 20, paddingVertical: 15 }}>
+                <Text selectable={true} style={{ fontSize: 14, color: '#3D576F' }}>{chat.title}</Text>
                 <View style={{ display: 'flex', flex: 1, flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 4 }}>
                     <Image style={{ width: 11.7, height: 12 }} source={require('../assets/spinner.png')} />
                     <Text style={{ color: '#3D576F8E', fontSize: 12 }}>{chat.created_at.split('T')[0]}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
         )
     }
 
@@ -52,12 +56,12 @@ export default function Home() {
         <View style={{ flex: 1 }}>
             <ScrollView style={{ paddingHorizontal: 20, marginBottom: 80 }}>
                 <View style={{ display: 'flex', flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <View style={{ backgroundColor: '#3CAF4A19', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: 144, height: 144 }}>
+                    <TouchableOpacity onPress={() => router.push('/settings')} style={{ backgroundColor: '#3CAF4A19', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: 144, height: 144 }}>
                         <View style={{ backgroundColor: '#3CAF4A', opacity: .14, alignItems: 'center', justifyContent: 'center', width: 'auto', borderRadius: 50, height: 50, width: 51 }}>
                             <Image style={{ width: 20.43, height: 20.43 }} source={require('../assets/person-green.png')} />
                         </View>
                         <Text style={{ color: '#3D576F', fontSize: 14, marginTop: 10, fontWeight: '600' }}>Konti yanjye</Text>
-                    </View>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => router.push('/help')} style={{ backgroundColor: '#F6BA151A', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: 144, height: 144 }}>
                         <View style={{ backgroundColor: '#F6BA15', opacity: .14, alignItems: 'center', justifyContent: 'center', width: 'auto', borderRadius: 50, height: 50, width: 51 }}>
                             <Image style={{ width: 9.78, height: 17.39 }} source={require('../assets/question_outline.png')} />

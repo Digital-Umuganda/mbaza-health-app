@@ -19,28 +19,48 @@ export default function Signup() {
             name: names,
             phone_number: phoneNumber,
             address: district,
-            password: pin,
-            email: "elvisrugero@gmail.com"
+            password: pin
         }
+
+        if (data.phone_number.startsWith('0')) {
+            data.phone_number = `25${data.phone_number}`;
+        } else if (data.phone_number.startsWith('7')) {
+            data.phone_number = `250${data.phone_number}`;
+        }
+
         console.log({ data });
+
         axios.post(`${url}/api/v1/auth/signup`, data)
             .then(function (response) {
                 console.log(response);
                 sendVerificationCode()
             })
             .catch(function (error) {
-                console.log(error);
+                console.warn({ error })
+                if (error.message == "Request failed with status code 409") {
+                    alert("Phone number already exists! Please login or use an other number!");
+                }
             });
     }
 
     const sendVerificationCode = () => {
-        axios({
+        const phone = phoneNumber;
+        if (phone.startsWith('0')) {
+            setPhoneNumber(`25${phone}`);
+        } else if (phone.startsWith('7')) {
+            setPhoneNumber(`250${phone}`);
+        }
+
+        const config = {
             method: 'post',
-            url: `${url}/api/v1/auth/send-code/${phoneNumber}`,
+            url: `${url}/api/v1/auth/send-code/${phone}`,
             params: {
                 field: 'phone'
             }
-        })
+        };
+
+        console.log({ config });
+        axios(config)
             .then(function (response) {
                 // console.log(response);
                 storeData('phone_number', phoneNumber)
@@ -98,7 +118,7 @@ export default function Signup() {
                         onChangeText={(text) => setPin(text)}
                     />
                 </View>
-                <Button onPress={() => signUp()} title="EMEZA" backgroundColor="#478CCA" textColor="white" />
+                <Button onPress={() => sendVerificationCode()} title="EMEZA" backgroundColor="#478CCA" textColor="white" />
                 <View style={{ marginTop: 40 }}></View>
                 <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
                 <StatusBar style="auto" />

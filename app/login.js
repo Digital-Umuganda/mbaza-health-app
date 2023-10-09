@@ -15,7 +15,13 @@ export default function Login() {
             username: phoneNumber,
             password: pin,
         }
-        
+
+        if (data.username.startsWith('0')) {
+            data.username = `25${data.username}`;
+        } else if (data.username.startsWith('7')) {
+            data.username = `250${data.username}`;
+        }
+
         axios.post(`${url}/api/v1/auth/login`, data)
             .then(function (response) {
                 console.log(response);

@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -16,6 +16,55 @@ export default function Chat() {
     const [translating, setTranslating] = useState(false);
     const [lastResponse, setLastResponse] = useState();
     const [lastAnswer, setLastAnswer] = useState();
+    const [chatId, setChatId] = useState()
+
+    const params = useLocalSearchParams();
+
+    useEffect(() => {
+        if (params != null && params?.chatId != null) {
+            console.log({ chatId: params.chatId });
+            setChatId(params.chatId);
+            fetchMessagesFromChat()
+        }
+    }, [])
+
+    const fetchMessagesFromChat = async () => {
+        const accessToken = await getData('access_token');
+        var config = {
+            method: 'get',
+            url: `${url}/api/v1/chats/${params.chatId}/messages`,
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            transformResponse: (data) => {
+                let dataArray = JSON.parse(data);
+
+                if (Array.isArray(dataArray)) {
+                    dataArray = dataArray.reverse();
+                }
+                
+                const messagesCopy = Array.from(messages);
+                Array.isArray(dataArray) && dataArray.forEach((chat) => {
+                    console.log({ chat })
+                    messagesCopy.push({ message: { answer: chat.kinyarwanda_question, created_at: chat.created_at }, type: 'request' })
+                    messagesCopy.push({ message: { answer: chat.kinyarwanda_response, created_at: chat.created_at.split("T").join(" ") }, type: 'response' })
+                })
+                setMessages(messagesCopy)
+            }
+        };
+
+        console.log({ config })
+
+        axios(config)
+            .then(function (response) {
+                // console.log({ data: response.data });
+                // setChats(response.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 
     useEffect(() => {
         console.log({ messages });
@@ -45,9 +94,15 @@ export default function Chat() {
     const handleSheetChanges = () => bottomSheetRef.current.expand();
 
     const chat = async () => {
-        const data = JSON.stringify({
+        let data = {
             "kinyarwanda_question": messages[messages.length - 1].message.answer
-        });
+        }
+
+        if (chatId != null) {
+            data.chat_id = chatId;
+        }
+
+        data = JSON.stringify(data);
 
         const accessToken = await getData('access_token');
 
@@ -86,11 +141,13 @@ export default function Chat() {
                 // You can do something with 'value' here.
                 // For example, if it's text data, you can convert it to a string.
                 let text = new TextDecoder().decode(value);
+                // console.log({ text });
                 try {
                     if (countOccurrences(text, '{') == 1) {
                         text = JSON.parse(text);
                         responseText.answer += text.answer;
                         responseText.created_at = text.created_at;
+                        setChatId(text.chat_id);
                         setLastAnswer(responseText.answer)
                     } else {
                         const splitText = text.split("}");
@@ -100,6 +157,7 @@ export default function Chat() {
                                 text = JSON.parse(splitT + "}");
                                 responseText.answer += text.answer;
                                 responseText.created_at = text.created_at;
+                                setChatId(text.chat_id);
                                 setLastAnswer(responseText.answer)
                             }
                         })

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mbaza-health-app",
+    "name": "Mbaza Health",
     "slug": "mbaza-health-app",
-    "version": "1.0.0",
+    "version": "0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,13 +22,22 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.digitalumuganda.mbazahealth"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0f2f7984-bb62-4594-aeea-0167eee1dcc6"
+      }
+    }
   }
 }

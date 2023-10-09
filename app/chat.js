@@ -8,7 +8,7 @@ import ChatResponse from "../chat-response";
 import ChatRequest from "../chat-request";
 import { getData, url } from "../utilities";
 import axios from "axios";
-import { fetch } from "react-native-fetch-api";
+import { fetch } from "../utilities/react-native-fetch-api/fetch";
 
 export default function Chat() {
     const [lastMessage, setLastMessage] = useState();
@@ -16,7 +16,8 @@ export default function Chat() {
     const [translating, setTranslating] = useState(false);
     const [lastResponse, setLastResponse] = useState();
     const [lastAnswer, setLastAnswer] = useState();
-    const [chatId, setChatId] = useState()
+    const [chatId, setChatId] = useState();
+    const [reloadResponse, setReloadResponse] = useState(false);
 
     const params = useLocalSearchParams();
 
@@ -43,7 +44,7 @@ export default function Chat() {
                 if (Array.isArray(dataArray)) {
                     dataArray = dataArray.reverse();
                 }
-                
+
                 const messagesCopy = Array.from(messages);
                 Array.isArray(dataArray) && dataArray.forEach((chat) => {
                     console.log({ chat })
@@ -134,31 +135,38 @@ export default function Chat() {
             const readChunk = async () => {
                 const { done, value } = await reader.read();
                 if (done) {
-                    console.info("stream done")
+                    console.info("stream done");
+                    // setChatId(responseText.chat_id);
+                    // setLastAnswer(responseText.answer)
+                    // setLastResponse(responseText);
                     reader.releaseLock();
                     return;
                 }
                 // You can do something with 'value' here.
                 // For example, if it's text data, you can convert it to a string.
                 let text = new TextDecoder().decode(value);
-                // console.log({ text });
+                console.log({ text });
                 try {
                     if (countOccurrences(text, '{') == 1) {
                         text = JSON.parse(text);
                         responseText.answer += text.answer;
                         responseText.created_at = text.created_at;
+                        setReloadResponse(true);
                         setChatId(text.chat_id);
                         setLastAnswer(responseText.answer)
+                        setReloadResponse(true);
                     } else {
                         const splitText = text.split("}");
                         splitText.forEach(splitT => {
                             if (splitT.startsWith("{")) {
-                                console.log({ splitT });
                                 text = JSON.parse(splitT + "}");
+                                console.log({ splitT, splitTObj: text });
                                 responseText.answer += text.answer;
                                 responseText.created_at = text.created_at;
+                                /* setReloadResponse(true);
                                 setChatId(text.chat_id);
                                 setLastAnswer(responseText.answer)
+                                setReloadResponse(true); */
                             }
                         })
                     }
@@ -167,14 +175,14 @@ export default function Chat() {
                         console.warn({ error: error.message, text });
                     }
                 }
-                // console.log({ responseText, text })
+                console.log({ responseText, text })
                 setLastResponse(responseText);
-                readChunk();
+                await readChunk();
             };
 
 
 
-            readChunk();
+            await readChunk();
         } catch (error) {
             console.warn({ message: error.message });
         }
@@ -202,7 +210,7 @@ export default function Chat() {
             messagesCopy.push({ message: lastResponse, type: 'response' });
             setMessages(messagesCopy);
         }
-    }, [lastResponse?.answer, lastAnswer])
+    }, [lastResponse?.answer, lastAnswer, reloadResponse])
 
     const renderMessage = (message, index) => {
         if (message.type == "request") {

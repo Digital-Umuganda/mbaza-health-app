@@ -100,7 +100,7 @@ export default function Login() {
             <Button title="UBUFASHA" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.push('/help')} />
             <View style={{ marginTop: 100 }}></View>
             <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
         </View>
     )
 }

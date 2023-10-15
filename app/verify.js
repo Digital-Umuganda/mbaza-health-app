@@ -46,7 +46,7 @@ export default function Verify() {
             <Button title="OHEREZA" backgroundColor="#478CCA" textColor="white" onPress={() => verifyOTP()} />
             <View style={{ marginTop: 100 }}></View>
             <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
         </View>
     )
 }

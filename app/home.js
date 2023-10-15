@@ -92,7 +92,7 @@ export default function Home() {
                     </View>
                 </View>
             </TouchableOpacity>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
         </View>
     )
 }

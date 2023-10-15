@@ -298,7 +298,7 @@ export default function Chat() {
                     <Text>Awesome 🎉</Text>
                 </View>
             </BottomSheet>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
         </View>
     )
 }

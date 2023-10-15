@@ -173,7 +173,7 @@ export default function Signup() {
                 <Button onPress={() => signUp()} title="EMEZA" backgroundColor="#478CCA" textColor="white" />
                 <View style={{ marginTop: 40 }}></View>
                 <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
-                <StatusBar style="auto" />
+                <StatusBar style="light" />
             </View>
         </KeyboardAwareScrollView>
     )

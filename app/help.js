@@ -19,7 +19,7 @@ export default function Help() {
             <Button title="Uko biyandikisha kuri App" backgroundColor="transparent" textColor="#3D576F" borderColor="#478CCA3D" fontSize={16} />
             <View style={{ marginTop: 10 }}></View>
             <Button title="Ninde ugenewe iyi App" backgroundColor="transparent" textColor="#3D576F" borderColor="#478CCA3D" fontSize={16} />
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
         </View>
     )
 }

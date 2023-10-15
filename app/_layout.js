@@ -54,7 +54,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18,
                 },
-                headerTitle: "RBC | BAZA"
+                headerTitle: "Konti yanjye"
             }} />
         </Stack>
     );

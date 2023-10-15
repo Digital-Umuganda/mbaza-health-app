@@ -6,7 +6,7 @@ import { Path, Svg } from "react-native-svg";
 import BottomSheet from '@gorhom/bottom-sheet';
 import ChatResponse from "../chat-response";
 import ChatRequest from "../chat-request";
-import { getData, url } from "../utilities";
+import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 
@@ -18,16 +18,29 @@ export default function Chat() {
     const [lastAnswer, setLastAnswer] = useState();
     const [chatId, setChatId] = useState();
     const [reloadResponse, setReloadResponse] = useState(false);
+    const [profile, setProfile] = useState();
 
     const params = useLocalSearchParams();
 
     useEffect(() => {
+        setTheChatUp();
+    }, [])
+
+    const setTheChatUp = async () => {
+        let profile = JSON.parse(await getUserProfile());
+
+        if (profile == null) {
+            profile = await fetchProfile();
+        }
+
+        setProfile(profile);
+
         if (params != null && params?.chatId != null) {
             console.log({ chatId: params.chatId });
             setChatId(params.chatId);
             fetchMessagesFromChat()
         }
-    }, [])
+    }
 
     const fetchMessagesFromChat = async () => {
         const accessToken = await getData('access_token');
@@ -96,7 +109,8 @@ export default function Chat() {
 
     const chat = async () => {
         let data = {
-            "kinyarwanda_question": messages[messages.length - 1].message.answer
+            kinyarwanda_question: messages[messages.length - 1].message.answer,
+            requested_at: new Date()
         }
 
         if (chatId != null) {
@@ -157,18 +171,25 @@ export default function Chat() {
                         setReloadResponse(true);
                     } else {
                         const splitText = text.split("}");
+                        console.log({ splits: splitText.length })
+                        let runs = 0;
                         splitText.forEach(splitT => {
+                            splitT = splitT.trim();
+                            console.log({ splitT1: splitT.charAt(0), splitT })
                             if (splitT.startsWith("{")) {
                                 text = JSON.parse(splitT + "}");
                                 console.log({ splitT, splitTObj: text });
                                 responseText.answer += text.answer;
+                                console.log({ responseText2: responseText, text })
                                 responseText.created_at = text.created_at;
-                                /* setReloadResponse(true);
-                                setChatId(text.chat_id);
-                                setLastAnswer(responseText.answer)
-                                setReloadResponse(true); */
+                                runs++;
                             }
-                        })
+                        });
+                        setReloadResponse(true);
+                        setChatId(text.chat_id);
+                        setLastAnswer(responseText.answer)
+                        setReloadResponse(true);
+                        console.log({ runs, responseText1: responseText, text })
                     }
                 } catch (error) {
                     if (error.message == "JSON Parse error: Unexpected character: {") {
@@ -207,6 +228,10 @@ export default function Chat() {
         }
 
         if (lastResponse) {
+            if (lastResponse.answer.includes('\n')) {
+                console.log({ newLine: lastResponse })
+            }
+            // console.log({ lastResponse, lastResponseArray: lastResponse.answer.split('\n')  })
             messagesCopy.push({ message: lastResponse, type: 'response' });
             setMessages(messagesCopy);
         }
@@ -214,7 +239,7 @@ export default function Chat() {
 
     const renderMessage = (message, index) => {
         if (message.type == "request") {
-            return <ChatRequest key={index} content={message.message} />
+            return <ChatRequest key={index} content={message.message} profile={profile} />
         } else if (message.type == "response") {
             return <ChatResponse key={index} content={message.message} />
         }
@@ -224,9 +249,15 @@ export default function Chat() {
         return Array.isArray(messages) && messages.length > 0 && messages.map((message, index) => renderMessage(message, index))
     }
 
+    const scrollViewRef = useRef();
+
     return (
         <View style={{ flex: 1, marginTop: 20 }}>
-            <ScrollView style={{ paddingHorizontal: 20, marginBottom: 80 }}>
+            <ScrollView
+                ref={scrollViewRef}
+                onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+                style={{ paddingHorizontal: 20, marginBottom: 80 }}
+            >
                 <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
                 {renderMessages()}
             </ScrollView>

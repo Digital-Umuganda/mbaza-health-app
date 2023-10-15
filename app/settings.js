@@ -153,8 +153,10 @@ export default function Settings() {
 
     return (
         <ScrollView style={{ flex: 1 }}>
-            <View style={{ width: 360, height: 118, backgroundColor: '#478CCA', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 25, alignItems: 'center' }}>
-                <Text style={{ fontSize: 24, color: '#FFFFFF' }}>Yves Honore</Text>
+            <View style={{ width: 360, height: 118, backgroundColor: '#478CCA', flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 25, alignItems: 'center', gap: 10 }}>
+                <View style={{maxWidth: "67%"}}>
+                    <Text style={{ fontSize: 24, color: '#FFFFFF' }}>{profile?.name && profile.name}</Text>
+                </View>
                 <TouchableOpacity
                     style={{ width: 115, height: 42, backgroundColor: 'rgba(255, 255, 255, 0.1)', alignItems: 'center', flexDirection: 'row', paddingHorizontal: 15, justifyContent: 'space-around' }}
                     onPress={() => {
@@ -245,7 +247,7 @@ export default function Settings() {
                 <Button onPress={() => updateUserCredentials()} title="EMEZA" backgroundColor="#478CCA" textColor="white" />
                 <View style={{ marginBottom: 20 }}></View>
             </View>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
         </ScrollView>
     )
 }

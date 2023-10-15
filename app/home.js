@@ -2,7 +2,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { getData, url } from "../utilities";
+import { fetchProfile, getData, url } from "../utilities";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -19,22 +19,30 @@ export default function Home() {
             },
         };
 
-        axios(config)
-            .then(function (response) {
-                console.log({ data: response.data });
-                let data = response.data;
-                if (Array.isArray(data)) {
-                    data = data.reverse();
-                }
-                setChats(response.data);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        try {
+            const response = await axios(config)
+
+            console.log({ data: response.data });
+
+            let data = response.data;
+
+            if (Array.isArray(data)) {
+                data = data.reverse();
+            }
+
+            setChats(response.data);
+        } catch (error) {
+            console.log({ error });
+        }
+    }
+
+    const setTheAppUp = async () => {
+        await fetchChats();
+        await fetchProfile();
     }
 
     useEffect(() => {
-        fetchChats();
+        setTheAppUp();
     }, [])
 
     const Chat = ({ chat }) => {
@@ -76,7 +84,7 @@ export default function Home() {
                     {rendeChats()}
                 </View>
             </ScrollView>
-            <TouchableOpacity onPress={() => router.push('/chat')} style={{ position: 'absolute', backgroundColor: '#478CCA', bottom: 0, width: '90%', height: 64, borderRadius: 8, justifyContent: 'center', paddingHorizontal: 20, marginHorizontal: 20, left: 0, right: 0, }}>
+            <TouchableOpacity onPress={() => router.push('/chat')} style={{ position: 'absolute', backgroundColor: '#478CCA', bottom: 10, width: '90%', height: 64, borderRadius: 8, justifyContent: 'center', paddingHorizontal: 20, marginHorizontal: 20, left: 0, right: 0, }}>
                 <View style={{ flexDirection: 'row' }}>
                     <Image style={{ width: 22.22, height: 20.63 }} source={require('../assets/chat.png')} />
                     <View style={{ alignItems: 'center', flex: 1 }}>

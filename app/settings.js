@@ -1,5 +1,5 @@
 import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Button from '../Button';
+import Button from "../Button";
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { fetchProfile, getData, getUserProfile, url } from '../utilities';

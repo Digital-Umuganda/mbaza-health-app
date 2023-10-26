@@ -1,5 +1,5 @@
 import { Image, KeyboardAvoidingView, SafeAreaView, Text, TextInput, View } from 'react-native';
-import Button from '../Button';
+import Button from "../Button";
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router } from 'expo-router';
 import { useEffect, useState } from 'react';

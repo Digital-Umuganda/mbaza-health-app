@@ -17,20 +17,17 @@ export default function Home() {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
+            params: {
+                sort_order: 'desc'
+            }
         };
 
         try {
-            const response = await axios(config)
-
-            console.log({ data: response.data });
+            const response = await axios(config);
 
             let data = response.data;
 
-            if (Array.isArray(data)) {
-                data = data.reverse();
-            }
-
-            setChats(response.data);
+            setChats(data);
         } catch (error) {
             console.log({ error });
         }

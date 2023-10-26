@@ -61,7 +61,7 @@ export default function Chat() {
                 const messagesCopy = Array.from(messages);
                 Array.isArray(dataArray) && dataArray.forEach((chat) => {
                     console.log({ chat })
-                    messagesCopy.push({ message: { answer: chat.kinyarwanda_question, created_at: chat.created_at }, type: 'request' })
+                    messagesCopy.push({ message: { answer: chat.kinyarwanda_question, requested_at: chat.requested_at }, type: 'request' })
                     messagesCopy.push({ message: { answer: chat.kinyarwanda_response, created_at: chat.created_at.split("T").join(" ") }, type: 'response' })
                 })
                 setMessages(messagesCopy)
@@ -91,7 +91,7 @@ export default function Chat() {
 
     const submit = () => {
         const messagesCopy = Array.from(messages);
-        messagesCopy.push({ message: { answer: lastMessage, created_at: new Date() }, type: 'request' });
+        messagesCopy.push({ message: { answer: lastMessage, requested_at: new Date() }, type: 'request' });
 
         setLastMessage('');
 
@@ -105,12 +105,12 @@ export default function Chat() {
     const snapPoints = useMemo(() => ['25%', '50%', '100%'], []);
 
     // callbacks
-    const handleSheetChanges = () => bottomSheetRef.current.expand();
+    const handleSheetChanges = () => router.push('/custom-chat');
 
     const chat = async () => {
         let data = {
             kinyarwanda_question: messages[messages.length - 1].message.answer,
-            requested_at: new Date()
+            requested_at: messages[messages.length - 1].message.requested_at
         }
 
         if (chatId != null) {

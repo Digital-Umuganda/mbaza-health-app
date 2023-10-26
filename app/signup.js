@@ -1,5 +1,5 @@
 import { Image, KeyboardAvoidingView, SafeAreaView, Text, TextInput, View } from 'react-native';
-import Button from "../Button";
+import Button from '../Button';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { storeData, url } from '../utilities';
 
 export default function Signup() {
+    const [isLoading, setIsLoading] = useState(false);
     const [district, setDistrict] = useState();
     const [names, setNames] = useState();
     const [phoneNumber, setPhoneNumber] = useState();
@@ -18,7 +19,12 @@ export default function Signup() {
     const signUp = () => {
         let bag = validate();
 
-        if (bag.phoneNumber == true || bag.pin == true || bag.district == true || bag.names == true) {
+        if (
+            bag.phoneNumber == true ||
+            bag.pin == true ||
+            bag.district == true ||
+            bag.names == true
+        ) {
             setErrorBag(bag);
             return;
         }
@@ -29,86 +35,106 @@ export default function Signup() {
             name: names,
             phone_number: phoneNumber,
             address: district,
-            password: pin
-        }
+            password: pin,
+        };
 
-        if (data.phone_number.startsWith('0')) {
+        if (data.phone_number.startsWith("0")) {
             data.phone_number = `25${data.phone_number}`;
-        } else if (data.phone_number.startsWith('7')) {
+        } else if (data.phone_number.startsWith("7")) {
             data.phone_number = `250${data.phone_number}`;
         }
 
-        console.log({ data });
-
-        axios.post(`${url}/api/v1/auth/signup`, data)
+        setIsLoading(true);
+        axios
+            .post(`${url}/api/v1/auth/signup`, data)
             .then(function (response) {
                 console.log(response);
-                sendVerificationCode()
+                sendVerificationCode();
             })
             .catch(function (error) {
-                console.warn({ error })
-                if (error.message == "Request failed with status code 409") {
-                    alert("Phone number already exists! Please login or use an other number!");
-                }
+                const message = error?.response?.data?.message || error?.message;
+                Toast.show({
+                    type: "error",
+                    text1: "Signup Failed",
+                    text2: message,
+                    position: "bottom",
+                });
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-    }
+    };
 
     const sendVerificationCode = () => {
         let phone = phoneNumber;
-        if (phone.startsWith('0')) {
+        if (phone.startsWith("0")) {
             phone = `25${phone}`;
-        } else if (phone.startsWith('7')) {
+        } else if (phone.startsWith("7")) {
             phone = `250${phone}`;
         }
 
         const config = {
-            method: 'post',
+            method: "post",
             url: `${url}/api/v1/auth/send-code/${phone}`,
             params: {
-                field: 'phone'
-            }
+                field: "phone",
+            },
         };
 
         console.log({ config });
         axios(config)
             .then(function (response) {
                 // console.log(response);
-                storeData('phone_number', phone)
-                    .then(() => router.push('/verify'))
+                storeData("phone_number", phone).then(() => router.push("/verify"));
             })
             .catch(function (error) {
                 console.log(error);
             });
-    }
+    };
 
     const validate = () => {
         const data = {
             name: names,
             phone_number: phoneNumber,
             address: district,
-            password: pin
-        }
+            password: pin,
+        };
 
         let bag = {};
 
-        if (data?.phone_number == null || typeof (data.phone_number) != "string" && (!(data.phone_number.startsWith('0') || data.phone_number.startsWith('7')) && data.phone_number.length != 10)) {
+        if (
+            data?.phone_number == null ||
+            (typeof data.phone_number != "string" &&
+                !(
+                    data.phone_number.startsWith("0") || data.phone_number.startsWith("7")
+                ) &&
+                data.phone_number.length != 10)
+        ) {
             bag.phoneNumber = true;
         }
 
-        if (data?.password == null || typeof (data.password) != "string" || data.password.length < 5) {
+        if (
+            data?.password == null ||
+            typeof data.password != "string" ||
+            data.password.length < 5
+        ) {
             bag.pin = true;
         }
 
-        if (data?.address == null || typeof (data.address) != "string") {
+        if (data?.address == null || typeof data.address != "string") {
             bag.district = true;
         }
 
-        if (data?.name == null || typeof (data.name) != "string" || data.name.length == 0) {
+        if (
+            data?.name == null ||
+            typeof data.name != "string" ||
+            data.name.length == 0
+        ) {
             bag.names = true;
         }
 
         return bag;
-    }
+    };
 
     return (
         <KeyboardAwareScrollView>
@@ -173,7 +199,7 @@ export default function Signup() {
                 <Button onPress={() => signUp()} title="EMEZA" backgroundColor="#478CCA" textColor="white" />
                 <View style={{ marginTop: 40 }}></View>
                 <Button title="Subira Inyuma" backgroundColor="transparent" textColor="#3D576F" underlineText={true} onPress={() => router.back()} />
-                <StatusBar style="dark" />
+                <StatusBar style="light" />
             </View>
         </KeyboardAwareScrollView>
     )

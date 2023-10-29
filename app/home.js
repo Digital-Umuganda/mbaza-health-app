@@ -61,13 +61,13 @@ export default function Home() {
         <View style={{ flex: 1 }}>
             <ScrollView style={{ paddingHorizontal: 20, marginBottom: 80 }}>
                 <View style={{ display: 'flex', flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <TouchableOpacity onPress={() => router.push('/settings')} style={{ backgroundColor: '#3CAF4A19', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: 144, height: 144 }}>
+                    <TouchableOpacity onPress={() => router.push('/settings')} style={{ backgroundColor: '#3CAF4A19', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: '45%', height: 144 }}>
                         <View style={{ backgroundColor: '#3CAF4A', opacity: .14, alignItems: 'center', justifyContent: 'center', width: 'auto', borderRadius: 50, height: 50, width: 51 }}>
                             <Image style={{ width: 20.43, height: 20.43 }} source={require('../assets/person-green.png')} />
                         </View>
                         <Text style={{ color: '#3D576F', fontSize: 14, marginTop: 10, fontWeight: '600' }}>Konti yanjye</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.push('/help')} style={{ backgroundColor: '#F6BA151A', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: 144, height: 144 }}>
+                    <TouchableOpacity onPress={() => router.push('/help')} style={{ backgroundColor: '#F6BA151A', padding: 20, alignItems: 'center', justifyContent: 'center', marginTop: 40, borderRadius: 8, width: '45%', height: 144 }}>
                         <View style={{ backgroundColor: '#F6BA15', opacity: .14, alignItems: 'center', justifyContent: 'center', width: 'auto', borderRadius: 50, height: 50, width: 51 }}>
                             <Image style={{ width: 9.78, height: 17.39 }} source={require('../assets/question_outline.png')} />
                         </View>

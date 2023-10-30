@@ -1,4 +1,11 @@
-import { ActivityIndicator, Image, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -42,7 +49,7 @@ export default function Login() {
         console.log({ response });
         storeData("access_token", response.data.access_token).then(() =>
           storeData("phone_number", phoneNumber).then(() =>
-            router.push("/home")
+            router.replace("/home")
           )
         );
       })
@@ -86,6 +93,10 @@ export default function Login() {
     }
 
     return bag;
+  };
+
+  const handleForgotPin = () => {
+    router.replace("/forgot-pin");
   };
 
   return (
@@ -133,7 +144,7 @@ export default function Login() {
           </Text>
         )}
       </View>
-      <View style={{ marginBottom: 20, width: "100%" }}>
+      <View style={{ marginBottom: 48, width: "100%" }}>
         <View
           style={{
             display: "flex",
@@ -166,11 +177,11 @@ export default function Login() {
         )}
 
         <View style={{ marginTop: 20 }}>
-          <TouchableOpacity onPress={handleForgotPassword}>
+          <TouchableOpacity onPress={handleForgotPin}>
             <Text
               style={{ color: "#478CCA", fontSize: 14, textAlign: "right" }}
             >
-              Forgot PIN?
+              Wibagiwe PIN?
             </Text>
           </TouchableOpacity>
         </View>
@@ -187,7 +198,7 @@ export default function Login() {
         textColor="white"
         onPress={() => logIn()}
       />
-      <View style={{ marginTop: 20 }}></View>
+      <View style={{ marginTop: 20 }} />
       <Button
         title="UBUFASHA"
         backgroundColor="transparent"
@@ -195,7 +206,7 @@ export default function Login() {
         underlineText={true}
         onPress={() => router.push("/help")}
       />
-      <View style={{ marginTop: 100 }}></View>
+      <View style={{ marginTop: 64 }}></View>
       <Button
         title="Subira Inyuma"
         backgroundColor="transparent"

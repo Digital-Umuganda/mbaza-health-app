@@ -6,6 +6,8 @@ export default function Layout() {
             <Stack.Screen name='index' options={{ headerShown: false }} />
             <Stack.Screen name='login' options={{ headerShown: false }} />
             <Stack.Screen name='signup' options={{ headerShown: false }} />
+            <Stack.Screen name='forgot-pin' options={{ headerShown: false }} />
+            <Stack.Screen name='verify-code' options={{ headerShown: false }} />
             <Stack.Screen name='help' options={{
                 headerStyle: {
                     backgroundColor: '#478CCA',

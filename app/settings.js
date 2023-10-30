@@ -12,7 +12,7 @@ import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { fetchProfile, getData, getUserProfile, url } from "../utilities";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SelectDropdown from "react-native-select-dropdown";
 import axios from "axios";
@@ -53,9 +53,6 @@ export default function Settings() {
   };
 
   const updateUserCredentials = async () => {
-    if (isLoading) {
-      return;
-    }
     const accessToken = await getData("access_token");
 
     let profileBag = validateProfile();
@@ -199,7 +196,7 @@ export default function Settings() {
     profile?.address != null && setDistrict(profile.address);
   }, [profile]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     Alert.alert(
       "Confirm Logout",
       "Are you sure you want to logout?",
@@ -213,12 +210,12 @@ export default function Settings() {
           onPress: () => {
             AsyncStorage.clear().then(() => router.replace("/login"));
           },
-          style: 'destructive',
+          style: "destructive",
         },
       ],
       { cancelable: false }
     );
-  };
+  }, []);
 
   return (
     <ScrollView style={{ flex: 1 }}>
@@ -240,6 +237,7 @@ export default function Settings() {
           </Text>
         </View>
         <TouchableOpacity
+          disabled={isLoading}
           style={{
             width: 115,
             height: 42,
@@ -450,21 +448,16 @@ export default function Settings() {
           )}
         </View>
         <Button
+          loading={isLoading}
           onPress={updateUserCredentials}
-          title={
-            isLoading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              "EMEZA"
-            )
-          }
+          title="EMEZA"
           backgroundColor="#478CCA"
           textColor="white"
         />
         <View style={{ marginBottom: 20 }}></View>
-        <Toast />
       </View>
       <StatusBar style="light" />
+      <Toast />
     </ScrollView>
   );
 }

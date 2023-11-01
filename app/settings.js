@@ -112,7 +112,7 @@ export default function Settings() {
       const { message } = updateProfile.value.data;
 
       Toast.show({
-        text1: "My Profile",
+        text1: "Umwirondoro wanjye",
         text2: message,
       });
     } else if (updateProfile.status === "rejected") {
@@ -122,8 +122,8 @@ export default function Settings() {
 
     if (changePassword?.status === "fulfilled") {
       Toast.show({
-        text1: "Update PIN",
-        text2: "PIN updated successfully",
+        text1: "Guhindura PIN",
+        text2: "PIN yahinduwe neza",
       });
     } else if (changePassword?.status === "rejected") {
       const errorMessage = changePassword.reason?.response?.data?.message;
@@ -198,15 +198,15 @@ export default function Settings() {
 
   const handleLogout = useCallback(() => {
     Alert.alert(
-      "Confirm Logout",
-      "Are you sure you want to logout?",
+      "Emeza gusohoka",
+      "Uzi neza ko ushaka gusohoka?",
       [
         {
-          text: "Cancel",
+          text: "Oya",
           style: "cancel",
         },
         {
-          text: "Logout",
+          text: "Yego",
           onPress: () => {
             AsyncStorage.clear().then(() => router.replace("/login"));
           },

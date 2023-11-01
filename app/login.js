@@ -216,7 +216,7 @@ export default function Login() {
           backgroundColor="transparent"
           textColor="#3D576F"
           underlineText={true}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")}
         />
         <StatusBar style="light" />
         <Toast />

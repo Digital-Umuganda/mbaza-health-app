@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SelectDropdown from "react-native-select-dropdown";
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import * as Updates from "expo-updates";
 
 const checkSession = async () => {
   const accessToken = await getData("access_token");
@@ -208,7 +209,9 @@ export default function Settings() {
         {
           text: "Yego",
           onPress: () => {
-            AsyncStorage.clear().then(() => router.replace("/login"));
+            AsyncStorage.clear().then(() => {
+              Updates.reloadAsync();
+            });
           },
           style: "destructive",
         },

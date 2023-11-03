@@ -210,6 +210,7 @@ export default function Settings() {
           text: "Yego",
           onPress: () => {
             AsyncStorage.clear().then(() => {
+              router.replace("/login");
               Updates.reloadAsync();
             });
           },

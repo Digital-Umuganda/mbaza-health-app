@@ -7,7 +7,7 @@ export default function ChatResponse({ content }) {
                 <View style={{ flexDirection: 'row', flex: 1 }}>
                     <Text style={{ fontSize: 12, color: '#478CCA', fontWeight: '700' }}>R</Text>
                     <Text style={{ fontSize: 12, color: '#F6BA15', fontWeight: '700' }}>B</Text>
-                    <Text style={{ fontSize: 12, color: '#478CCA', fontWeight: '700' }}>C</Text>
+                    <Text style={{ fontSize: 12, color: '#3CAF4A', fontWeight: '700' }}>C</Text>
                 </View>
                 <View style={{ flexDirection: 'row' }}>
                     <Text style={{ color: '#3D576F8E' }}>{content != null && content?.created_at !== undefined && content?.created_at.includes(':') && content.created_at.split(':', 2).join(':')}</Text>

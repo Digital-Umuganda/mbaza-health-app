@@ -5,11 +5,14 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { router } from "expo-router";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { url } from "../utilities";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Button from "../Button";
 
 const ForgotPinScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,13 +65,17 @@ const ForgotPinScreen = () => {
   };
   return (
     <>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Text
           style={{
             color: "#478CCA",
-            fontSize: 24,
-            fontWeight: "bold",
-            marginBottom: 8,
+            fontSize: 36,
           }}
         >
           Wibagiwe PIN
@@ -80,6 +87,7 @@ const ForgotPinScreen = () => {
             textAlign: "center",
             width: "80%",
             marginBottom: 20,
+            marginTop: 10,
           }}
         >
           Uzuzamo nimero yawe ya telefoni wakoresheje wiyandikisha.
@@ -96,8 +104,9 @@ const ForgotPinScreen = () => {
           }}
           inputMode="tel"
           value={phoneNumber}
-          onChangeText={(text) => setPhoneNumber(text)}
+          onChangeText={setPhoneNumber}
         />
+
         {errorBag.phoneNumber && (
           <Text
             style={{
@@ -117,7 +126,7 @@ const ForgotPinScreen = () => {
             padding: 10,
             borderRadius: 8,
             width: "80%",
-            paddingVertical: 15,
+            paddingVertical: 18,
             marginTop: 32,
           }}
           onPress={onSubmit}
@@ -125,29 +134,31 @@ const ForgotPinScreen = () => {
           {isLoading ? (
             <ActivityIndicator size="small" color="#ffffff" />
           ) : (
-            <Text style={{ color: "white", textAlign: "center" }}>Ohereza</Text>
+            <Text
+              style={{
+                color: "white",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: 22,
+                textTransform: "uppercase",
+              }}
+            >
+              Ohereza
+            </Text>
           )}
         </TouchableOpacity>
 
         <View style={{ marginTop: 64 }}>
-          <TouchableOpacity
-            onPress={() => {
-              router.replace("/login");
-            }}
-          >
-            <Text
-              style={{
-                color: "#478CCA",
-                fontSize: 24,
-                textAlign: "center",
-                textDecorationLine: "underline",
-              }}
-            >
-              Subira Inyuma
-            </Text>
-          </TouchableOpacity>
+          <Button
+            title="Subira Inyuma"
+            backgroundColor="transparent"
+            textColor="#3D576F"
+            underlineText={true}
+            onPress={router.back}
+          />
         </View>
       </View>
+      <StatusBar style="light" />
       <Toast />
     </>
   );

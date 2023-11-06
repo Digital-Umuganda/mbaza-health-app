@@ -20,6 +20,18 @@ export default function Layout() {
                 },
                 headerTitle: "RBC | BAZA"
             }} />
+            <Stack.Screen name='help-detail' options={{
+                headerStyle: {
+                    backgroundColor: '#478CCA',
+                },
+                headerTintColor: '#F7BB3A',
+                headerTitleStyle: {
+                    fontWeight: 'bold',
+                    color: 'white',
+                    fontSize: 18
+                },
+                headerTitle: "RBC | BAZA"
+            }} />
             <Stack.Screen name='home' options={{
                 headerStyle: {
                     backgroundColor: '#478CCA',

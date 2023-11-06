@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  StatusBar,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { storeData, url } from "../utilities";
+import Button from "../Button";
 
 const VerifyCodeScreen = () => {
   const params = useLocalSearchParams();
@@ -171,24 +173,16 @@ const VerifyCodeScreen = () => {
         </TouchableOpacity>
 
         <View style={{ marginTop: 64 }}>
-          <TouchableOpacity
-            onPress={() => {
-              router.replace("/login");
-            }}
-          >
-            <Text
-              style={{
-                color: "#478CCA",
-                fontSize: 24,
-                textAlign: "center",
-                textDecorationLine: "underline",
-              }}
-            >
-              Subira Inyuma
-            </Text>
-          </TouchableOpacity>
+          <Button
+            title="Subira Inyuma"
+            backgroundColor="transparent"
+            textColor="#3D576F"
+            underlineText={true}
+            onPress={router.back}
+          />
         </View>
       </View>
+      <StatusBar style="light" />
       <Toast />
     </>
   );

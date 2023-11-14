@@ -35,7 +35,6 @@ export const fetchProfile = async () => {
             }
         })
 
-        console.log({ profile: response.data })
         storeData('profile', JSON.stringify(response.data))
         return response.data;
     } catch (error) {

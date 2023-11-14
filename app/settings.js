@@ -118,7 +118,6 @@ export default function Settings() {
       });
     } else if (updateProfile.status === "rejected") {
       const errorMessage = updateProfile.reason;
-      console.log("Error Profile", errorMessage);
     }
 
     if (changePassword?.status === "fulfilled") {
@@ -355,7 +354,6 @@ export default function Settings() {
             <SelectDropdown
               data={elligibleDistricts}
               onSelect={(selectedItem, index) => {
-                console.log({ selectedItem });
                 setDistrict(selectedItem);
               }}
               buttonStyle={{

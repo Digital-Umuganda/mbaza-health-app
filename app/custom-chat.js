@@ -73,81 +73,8 @@ export default function Signup() {
         pathname: "/chat",
         params: { chatId: params.chatId, message },
       });
-
-      return;
-      //   let data = {
-      //     kinyarwanda_question: message,
-      //     requested_at: new Date(),
-      //   };
-
-      //   data = JSON.stringify(data);
-
-      //   const accessToken = await getData("access_token");
-
-      //   const requestOptions = {
-      //     method: "POST",
-      //     headers: {
-      //       Authorization: `Bearer ${accessToken}`,
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: data,
-      //     reactNative: { textStreaming: true },
-      //   };
-
-      //   console.log({ requestOptions });
-
-      //   const response = await fetch(`${url}/api/v1/chatbot`, requestOptions);
-
-      //   const stream = response.body;
-
-      //   const reader = stream.getReader();
-
-      //   const readChunk = async () => {
-      //     const { done, value } = await reader.read();
-      //     if (done) {
-      //       console.info("stream done");
-      //       reader.releaseLock();
-      //       setLoading(false);
-      //       return;
-      //     }
-      //     // You can do something with 'value' here.
-      //     // For example, if it's text data, you can convert it to a string.
-      //     let text = new TextDecoder().decode(value);
-      //     // console.log({ text: countOccurrences() });
-      //     try {
-      //       if (countOccurrences(text, "{") == 1) {
-      //         text = JSON.parse(text);
-      //         setChatId(text.chat_id);
-      //       } else {
-      //         const splitText = text.split("}");
-      //         console.log({ text });
-      //         splitText.forEach((splitT) => {
-      //           splitT = splitT.trim();
-      //           console.log({ splitT1: splitT.charAt(0), splitT });
-      //           if (splitT.startsWith("{")) {
-      //             text = JSON.parse(splitT + "}");
-      //             setChatId(text.chat_id);
-      //           }
-      //         });
-      //       }
-      //     } catch (error) {
-      //       setLoading(false);
-      //       if (error.message == "JSON Parse error: Unexpected character: {") {
-      //         console.warn({ error: error.message, text });
-      //       }
-      //     }
-      //     await readChunk();
-      //   };
-
-      //   if (!response.ok) {
-      //     setLoading(false);
-      //     throw new Error(`HTTP error! Status: ${response.status}`);
-      //   } else {
-      //     await readChunk();
-      //   }
     } catch (error) {
       setLoading(false);
-      console.warn({ error });
     }
   };
 
@@ -187,12 +114,6 @@ export default function Signup() {
 
     return bag;
   };
-
-//   useEffect(() => {
-//     if (chatId != null && loading == false) {
-//       router.replace({ pathname: "/chat", params: { chatId: chatId } });
-//     }
-//   }, [loading]);
 
   return (
     <KeyboardAwareScrollView>
@@ -243,7 +164,6 @@ export default function Signup() {
               <SelectDropdown
                 data={["Gabo", "Gore"]}
                 onSelect={(selectedItem, index) => {
-                  console.log({ selectedItem });
                   setSex(selectedItem);
                 }}
                 buttonStyle={{ flex: 1 }}
@@ -362,7 +282,6 @@ export default function Signup() {
                 "Umusonga",
               ]}
               onSelect={(selectedItem, index) => {
-                console.log({ selectedItem });
                 setDisease(selectedItem);
               }}
               buttonStyle={{ width: "100%" }}

@@ -19,6 +19,7 @@ import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import Toast from "react-native-toast-message";
+import RecordAudio from "./components/RecordAudio";
 
 export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
@@ -473,6 +474,7 @@ export default function Chat() {
               source={require("../assets/levels.png")}
             />
           </TouchableOpacity>
+          <RecordAudio />
           <TextInput
             style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
             onChangeText={(text) => {

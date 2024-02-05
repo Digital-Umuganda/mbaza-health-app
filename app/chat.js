@@ -17,6 +17,7 @@ import ChatRequest from "../chat-request";
 import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
+import RecordAudio from "./components/RecordAudio";
 
 export default function Chat() {
   const [lastMessage, setLastMessage] = useState(null);
@@ -350,6 +351,7 @@ export default function Chat() {
               source={require("../assets/levels.png")}
             />
           </TouchableOpacity>
+          <RecordAudio />
           <TextInput
             style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
             onChangeText={(text) => {

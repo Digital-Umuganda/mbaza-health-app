@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-export const url = "https://backend-api.umuganda.digital";
+export const url = "https://6ae1-105-178-32-175.ngrok-free.app";
 
 export const storeData = async (key, value) => {
     try {

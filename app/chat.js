@@ -1,9 +1,8 @@
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,13 +17,12 @@ import ChatRequest from "../chat-request";
 import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
-import Toast from "react-native-toast-message";
 import RecordAudio from "./components/RecordAudio";
+import AudioPlayList from "./components/AudioPlayList";
 
 export default function Chat() {
-  const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordUrl, setRecordUrl] = useState(null);
   const [lastMessage, setLastMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
@@ -34,22 +32,6 @@ export default function Chat() {
   const [chatId, setChatId] = useState(null);
   const [reloadResponse, setReloadResponse] = useState(false);
   const [profile, setProfile] = useState(null);
-  const [action, setAction] = useState(null);
-
-  useEffect(() => {
-    navigation.addListener("beforeRemove", (e) => {
-      if (params.hasFeedback === "false" && messages.length > 0) {
-        e.preventDefault();
-        setModalVisible(true);
-
-        setAction(e.data.action);
-      }
-    });
-
-    return () => {
-      navigation.removeListener("beforeRemove");
-    };
-  }, [navigation, params, messages]);
 
   useEffect(() => {
     setTheChatUp();
@@ -74,41 +56,6 @@ export default function Chat() {
     if (params.message) {
       setLastMessage(params.message);
       submit(params.message);
-    }
-  };
-
-  const sendFeedback = async (is_satisfied) => {
-    if (!chatId || isLoading) {
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const accessToken = await getData("access_token");
-      await axios.post(
-        `${url}/api/v1/feedbacks/${chatId}/feedback`,
-        {
-          is_satisfied,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (action) {
-        navigation.dispatch(action);
-      }
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
-      Toast.show({
-        type: "error",
-        text1: "Feedback Failed",
-        text2: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-      setModalVisible(false);
     }
   };
 
@@ -138,6 +85,7 @@ export default function Chat() {
               message: {
                 answer: chat.kinyarwanda_question,
                 requested_at: chat.requested_at,
+                audio_question: chat.audio_question,
               },
               type: "request",
             });
@@ -145,6 +93,7 @@ export default function Chat() {
               message: {
                 answer: chat.kinyarwanda_response,
                 created_at: chat.created_at.split("T").join(" "),
+                audio_responses: chat.audio_responses,
               },
               type: "response",
             });
@@ -155,9 +104,12 @@ export default function Chat() {
 
     await axios(config)
       .then(function (response) {
+        // console.log({ data: response.data });
         // setChats(response.data);
       })
-      .catch(function (error) {});
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
@@ -170,10 +122,17 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const submit = (message = null) => {
+  const submit = (message = null, audio_question = null) => {
+    if (!message?.trim() && !audio_question?.trim()) {
+      return;
+    }
     const messagesCopy = Array.from(messages);
     messagesCopy.push({
-      message: { answer: message || lastMessage, requested_at: new Date() },
+      message: {
+        answer: message,
+        requested_at: new Date(),
+        audio_question,
+      },
       type: "request",
     });
 
@@ -196,16 +155,33 @@ export default function Chat() {
     });
 
   const chat = async () => {
+    const lastQuestion = messages[messages.length - 1].message;
+    const isAudio = lastQuestion.audio_question != null;
+
     let data = {
-      kinyarwanda_question: messages[messages.length - 1].message.answer,
-      requested_at: messages[messages.length - 1].message.requested_at,
+      kinyarwanda_question: lastQuestion.answer,
+      requested_at: lastQuestion.requested_at,
+      with_audio: true,
     };
+
+    if (isAudio) {
+      const uri = lastQuestion.audio_question;
+      const filetype = uri.split(".").pop();
+      const filename = uri.split("/").pop();
+      const formData = new FormData();
+      formData.append("audio_file", {
+        uri,
+        type: `audio/${filetype}`,
+        name: filename,
+      });
+      data = formData;
+    } else {
+      data = JSON.stringify(data);
+    }
 
     if (chatId != null) {
       data.chat_id = chatId || params.chatId;
     }
-
-    data = JSON.stringify(data);
 
     const accessToken = await getData("access_token");
 
@@ -213,7 +189,8 @@ export default function Chat() {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        "Content-Type": isAudio ? "multipart/form-data" : "application/json",
+        Accept: "application/json",
       },
       body: data,
       reactNative: { textStreaming: true },
@@ -221,7 +198,10 @@ export default function Chat() {
 
     setTranslating(true);
     try {
-      const response = await fetch(`${url}/api/v1/chatbot`, requestOptions);
+      const endpoint = isAudio
+        ? `/chatbot-audio?requested_at=${new Date().toISOString()}&chat_id=${chatId}`
+        : "/kiny/chatbot";
+      const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -236,7 +216,6 @@ export default function Chat() {
       const readChunk = async () => {
         const { done, value } = await reader.read();
         if (done) {
-          console.info("stream done");
           // setChatId(responseText.chat_id);
           // setLastAnswer(responseText.answer)
           // setLastResponse(responseText);
@@ -246,36 +225,49 @@ export default function Chat() {
         // You can do something with 'value' here.
         // For example, if it's text data, you can convert it to a string.
         let text = new TextDecoder().decode(value);
-        try {
-          if (countOccurrences(text, "{") == 1) {
-            text = JSON.parse(text);
-            responseText.answer += text.answer;
-            responseText.created_at = text.created_at;
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-          } else {
-            const splitText = text.split("}");
-            let runs = 0;
-            splitText.forEach((splitT) => {
-              splitT = splitT.trim();
-              if (splitT.startsWith("{")) {
-                text = JSON.parse(splitT + "}");
-                responseText.answer += text.answer;
-                responseText.created_at = text.created_at;
-                runs++;
+        if (countOccurrences(text, "{") == 1) {
+          text = JSON.parse(text);
+          responseText.answer += text.answer;
+          responseText.created_at = text.created_at;
+          if (lastResponse?.audio_responses?.length && text.audio_response) {
+            responseText.audio_responses = [
+              ...lastResponse.audio_responses,
+              text.audio_response,
+            ];
+          } else if (text.audio_response) {
+            responseText.audio_responses = [text.audio_response];
+          }
+          setReloadResponse(true);
+          setChatId(text.chat_id);
+          setLastAnswer(responseText.answer);
+          setReloadResponse(true);
+        } else {
+          const splitText = text.split("}");
+          let runs = 0;
+          splitText.forEach((splitT) => {
+            splitT = splitT.trim();
+            if (splitT.startsWith("{")) {
+              text = JSON.parse(splitT + "}");
+              responseText.answer += text.answer;
+              responseText.created_at = text.created_at;
+              if (
+                lastResponse?.audio_responses?.length &&
+                text.audio_response
+              ) {
+                responseText.audio_responses = [
+                  ...lastResponse.audio_responses,
+                  text.audio_response,
+                ];
+              } else if (text.audio_response) {
+                responseText.audio_responses = [text.audio_response];
               }
-            });
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-          }
-        } catch (error) {
-          if (error.message == "JSON Parse error: Unexpected character: {") {
-            console.warn({ error: error.message, text });
-          }
+              runs++;
+            }
+          });
+          setReloadResponse(true);
+          setChatId(text.chat_id);
+          setLastAnswer(responseText.answer);
+          setReloadResponse(true);
         }
         setLastResponse(responseText);
 
@@ -287,7 +279,7 @@ export default function Chat() {
 
       await readChunk();
     } catch (error) {
-      console.warn({ message: error.message });
+      // console.log(error);
     } finally {
       setTranslating(false);
     }
@@ -340,104 +332,49 @@ export default function Chat() {
   const scrollViewRef = useRef();
 
   return (
-    <View style={{ flex: 1, marginTop: 20 }}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
+    <View style={{ flex: 1 }}>
+      <TouchableOpacity
+        onPress={() => handleSheetChanges(2)}
+        style={{
+          width: "100%",
+          backgroundColor: "#FFFFFF",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingVertical: 10,
+          paddingHorizontal: 20,
         }}
       >
         <View
           style={{
-            flex: 1,
-            justifyContent: "center",
+            flexDirection: "row",
             alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
           }}
         >
-          <View
-            style={{
-              backgroundColor: "white",
-              padding: 20,
-              borderRadius: 10,
-              maxWidth: "70%",
-            }}
-          >
-            <Text
-              style={{ fontSize: 24, textAlign: "center", color: "#3D576F" }}
-            >
-              Ese mwanyuzwe nibisubizo mwahawe?
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 48,
-                marginTop: 20,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => sendFeedback(true)}
-                style={{
-                  backgroundColor: "rgba(60, 175, 74, 0.1)",
-                  paddingHorizontal: 32,
-                  paddingVertical: 12,
-                  borderRadius: 4,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 3,
-                }}
-              >
-                <Image
-                  style={{ width: 15, height: 15 }}
-                  source={require("../assets/thumbs-up.png")}
-                />
-                <Text
-                  style={{
-                    color: "rgba(60, 175, 74, 1)",
-                    fontSize: 16,
-                  }}
-                >
-                  Yego
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => sendFeedback(false)}
-                style={{
-                  backgroundColor: "rgba(246, 66, 21, 0.1)",
-                  paddingHorizontal: 32,
-                  paddingVertical: 12,
-                  borderRadius: 4,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 3,
-                }}
-              >
-                <Image
-                  style={{ width: 15, height: 15 }}
-                  source={require("../assets/thumbs-down.png")}
-                />
-                <Text
-                  style={{
-                    color: "rgba(246, 66, 21, 1)",
-                    fontSize: 16,
-                  }}
-                >
-                  Oya
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Image
+            style={{ width: 24, height: 24 }}
+            source={require("../assets/exceptio_icon.png")}
+          />
+          <Text style={{ color: "#3D576F", marginHorizontal: 4, fontSize: 16 }}>
+            IBIBAZO BYIHARIYE
+          </Text>
         </View>
-      </Modal>
+        <Image
+          style={{ width: 24, height: 24 }}
+          source={require("../assets/chevron_right_icon.png")}
+        />
+      </TouchableOpacity>
       <ScrollView
         ref={scrollViewRef}
         onContentSizeChange={() =>
           scrollViewRef.current.scrollToEnd({ animated: true })
         }
-        style={{ paddingHorizontal: 20, marginBottom: 80 }}
+        style={{
+          paddingHorizontal: 20,
+          marginBottom: 80,
+          paddingTop: 16,
+          marginTop: 4,
+        }}
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}
@@ -468,25 +405,40 @@ export default function Chat() {
             paddingVertical: 1,
           }}
         >
-          <TouchableOpacity onPress={() => handleSheetChanges(2)}>
-            <Image
-              style={{ width: 20, height: 20 }}
-              source={require("../assets/levels.png")}
-            />
-          </TouchableOpacity>
-          <RecordAudio />
-          <TextInput
-            style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
-            onChangeText={(text) => {
-              setLastMessage(text);
-            }}
-            value={lastMessage}
-            placeholder="Enter message"
-            placeholderTextColor="white"
-            multiline
-          />
+          {recordUrl ? (
+            <AudioPlayList playlist={[recordUrl]} />
+          ) : (
+            <>
+              <RecordAudio
+                onSubmit={(uri) => {
+                  setRecordUrl(uri);
+                }}
+                setIsRecording={setIsRecording}
+              />
+              <TextInput
+                style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
+                onChangeText={(text) => {
+                  setLastMessage(text);
+                }}
+                value={lastMessage}
+                placeholder="Enter message"
+                placeholderTextColor="white"
+                multiline
+              />
+            </>
+          )}
           <TouchableOpacity
-            onPress={() => submit()}
+            onPress={() => {
+              if (isRecording) {
+                return;
+              }
+              if (recordUrl) {
+                submit(null, recordUrl);
+                setRecordUrl(null);
+              } else {
+                submit(lastMessage);
+              }
+            }}
             style={{
               backgroundColor: "#478CCA",
               borderRadius: 3,
@@ -531,7 +483,6 @@ export default function Chat() {
         </View>
       </BottomSheet>
       <StatusBar style="light" />
-      <Toast />
     </View>
   );
 }

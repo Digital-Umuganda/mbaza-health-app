@@ -4,14 +4,8 @@ import { Audio } from "expo-av";
 import { getData, url } from "../../utilities";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
-import {
-  AndroidAudioEncoder,
-  AndroidOutputFormat,
-  IOSAudioQuality,
-  IOSOutputFormat,
-} from "expo-av/build/Audio";
 
-const RecordAudio = () => {
+const RecordAudio = ({ onSubmit = () => {} }) => {
   const [recording, setRecording] = React.useState();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
 
@@ -45,13 +39,15 @@ const RecordAudio = () => {
       allowsRecordingIOS: false,
     });
     const uri = recording.getURI();
-    const info = await FileSystem.getInfoAsync(uri || "");
-    await uploadAudioFile(info);
+    await uploadAudioFile(uri);
   }
 
-  async function uploadAudioFile(info) {
+  async function uploadAudioFile(uri) {
     try {
-      const uri = info.uri;
+      if (!uri) {
+        console.warn("No audio file to upload");
+        return;
+      }
       const filetype = uri.split(".").pop();
       const filename = uri.split("/").pop();
       const formData = new FormData();
@@ -61,24 +57,23 @@ const RecordAudio = () => {
         name: filename,
       });
 
-      const accessToken = await getData("access_token");
+      onSubmit(uri);
 
-      const response = await axios.post(
-        `${url}/api/v1/chatbot-audio?requested_at=${new Date().toISOString()}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // const accessToken = await getData("access_token");
 
-      console.log("Audio file uploaded successfully");
-      console.log("Response:", response.data);
+      // const response = await axios.post(
+      //   `${url}/api/v1/chatbot-audio?requested_at=${new Date().toISOString()}`,
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //       Accept: "application/json",
+      //       Authorization: `Bearer ${accessToken}`,
+      //     },
+      //   }
+      // );
     } catch (error) {
-      console.error("Failed to upload audio file", error?.response?.data);
+      console.error("Failed to upload audio file", error);
     }
   }
 
@@ -87,14 +82,13 @@ const RecordAudio = () => {
       <TouchableOpacity
         onPress={recording ? stopRecording : startRecording}
         style={{
-          marginLeft: 16,
           borderRightWidth: 2,
           borderColor: "#CADEF0",
           paddingRight: 10,
         }}
       >
         <Image
-          style={{ width: 20, height: 20 }}
+          style={{ width: 24, height: 24 }}
           source={
             recording
               ? require(`../../assets/record_stop.png`)

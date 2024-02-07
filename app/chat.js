@@ -36,7 +36,6 @@ export default function Chat() {
 
   useEffect(() => {
     if (params?.chatId) {
-      console.log("test chat id", params.chatId);
       setChatId(params.chatId);
     }
   }, [params]);
@@ -79,7 +78,6 @@ export default function Chat() {
         const messagesCopy = Array.from(messages);
         Array.isArray(dataArray) &&
           dataArray.forEach((chat) => {
-            console.log({ chat });
             messagesCopy.push({
               message: {
                 answer: chat.kinyarwanda_question,
@@ -91,6 +89,8 @@ export default function Chat() {
               message: {
                 answer: chat.kinyarwanda_response,
                 created_at: chat.created_at.split("T").join(" "),
+                audio_responses: chat.audio_responses,
+                audio_question: chat.audio_question,
               },
               type: "response",
             });
@@ -98,8 +98,6 @@ export default function Chat() {
         setMessages(messagesCopy);
       },
     };
-
-    console.log({ config });
 
     await axios(config)
       .then(function (response) {
@@ -112,8 +110,6 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    console.log({ messages });
-
     if (
       Array.isArray(messages) &&
       messages.length > 0 &&
@@ -123,10 +119,14 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const submit = (message = null) => {
+  const submit = (message = null, audio_question = null) => {
     const messagesCopy = Array.from(messages);
     messagesCopy.push({
-      message: { answer: message || lastMessage, requested_at: new Date() },
+      message: {
+        answer: message || lastMessage,
+        requested_at: new Date(),
+        audio_question,
+      },
       type: "request",
     });
 
@@ -149,16 +149,32 @@ export default function Chat() {
     });
 
   const chat = async () => {
+    const lastQuestion = messages[messages.length - 1].message;
+    const isAudio = lastQuestion.audio_question != null;
     let data = {
-      kinyarwanda_question: messages[messages.length - 1].message.answer,
-      requested_at: messages[messages.length - 1].message.requested_at,
+      kinyarwanda_question: lastQuestion.answer,
+      requested_at: lastQuestion.requested_at,
+      with_audio: true,
     };
+
+    if (isAudio) {
+      const uri = lastQuestion.audio_question;
+      const filetype = uri.split(".").pop();
+      const filename = uri.split("/").pop();
+      const formData = new FormData();
+      formData.append("audio_file", {
+        uri,
+        type: `audio/${filetype}`,
+        name: filename,
+      });
+      data = formData;
+    } else {
+      data = JSON.stringify(data);
+    }
 
     if (chatId != null) {
       data.chat_id = chatId || params.chatId;
     }
-
-    data = JSON.stringify(data);
 
     const accessToken = await getData("access_token");
 
@@ -166,17 +182,19 @@ export default function Chat() {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        "Content-Type": isAudio ? "multipart/form-data" : "application/json",
+        Accept: "application/json",
       },
       body: data,
       reactNative: { textStreaming: true },
     };
 
-    console.log({ requestOptions });
-
     setTranslating(true);
     try {
-      const response = await fetch(`${url}/api/v1/chatbot`, requestOptions);
+      const endpoint = isAudio
+        ? `/chatbot-audio?requested_at=${new Date().toISOString()}`
+        : "/kiny/chatbot";
+      const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -191,7 +209,6 @@ export default function Chat() {
       const readChunk = async () => {
         const { done, value } = await reader.read();
         if (done) {
-          console.info("stream done");
           // setChatId(responseText.chat_id);
           // setLastAnswer(responseText.answer)
           // setLastResponse(responseText);
@@ -201,56 +218,46 @@ export default function Chat() {
         // You can do something with 'value' here.
         // For example, if it's text data, you can convert it to a string.
         let text = new TextDecoder().decode(value);
-        console.log({ text });
-        try {
-          if (countOccurrences(text, "{") == 1) {
-            text = JSON.parse(text);
-            responseText.answer += text.answer;
-            responseText.created_at = text.created_at;
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-          } else {
-            const splitText = text.split("}");
-            console.log({ splits: splitText.length });
-            let runs = 0;
-            splitText.forEach((splitT) => {
-              splitT = splitT.trim();
-              console.log({ splitT1: splitT.charAt(0), splitT });
-              if (splitT.startsWith("{")) {
-                text = JSON.parse(splitT + "}");
-                console.log({ splitT, splitTObj: text });
-                responseText.answer += text.answer;
-                console.log({ responseText2: responseText, text });
-                responseText.created_at = text.created_at;
-                runs++;
-              }
-            });
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-            console.log({ runs, responseText1: responseText, text });
-          }
-        } catch (error) {
-          if (error.message == "JSON Parse error: Unexpected character: {") {
-            console.warn({ error: error.message, text });
-          }
+        if (countOccurrences(text, "{") == 1) {
+          text = JSON.parse(text);
+          responseText.answer += text.answer;
+          responseText.created_at = text.created_at;
+          responseText.audio_responses = text.audio_responses;
+          responseText.audio_question = text.audio_question;
+          setReloadResponse(true);
+          setChatId(text.chat_id);
+          setLastAnswer(responseText.answer);
+          setReloadResponse(true);
+        } else {
+          const splitText = text.split("}");
+          let runs = 0;
+          splitText.forEach((splitT) => {
+            splitT = splitT.trim();
+            if (splitT.startsWith("{")) {
+              text = JSON.parse(splitT + "}");
+              responseText.answer += text.answer;
+              responseText.created_at = text.created_at;
+              responseText.audio_responses = text.audio_responses;
+              responseText.audio_question = text.audio_question;
+              runs++;
+            }
+          });
+          setReloadResponse(true);
+          setChatId(text.chat_id);
+          setLastAnswer(responseText.answer);
+          setReloadResponse(true);
         }
-        console.log({ responseText, text });
         setLastResponse(responseText);
 
         if (!chatId && responseText.chat_id) {
           setChatId(responseText.chat_id);
-          console.log({ chatId: responseText.chat_id });
         }
         await readChunk();
       };
 
       await readChunk();
     } catch (error) {
-      console.warn({ message: error.message });
+      // console.log(error);
     } finally {
       setTranslating(false);
     }
@@ -267,7 +274,6 @@ export default function Chat() {
   }
 
   useEffect(() => {
-    console.log({ lastResponse });
     const messagesCopy = Array.from(messages);
 
     if (
@@ -278,10 +284,6 @@ export default function Chat() {
     }
 
     if (lastResponse) {
-      if (lastResponse.answer.includes("\n")) {
-        console.log({ newLine: lastResponse });
-      }
-      // console.log({ lastResponse, lastResponseArray: lastResponse.answer.split('\n')  })
       messagesCopy.push({ message: lastResponse, type: "response" });
       setMessages(messagesCopy);
     }
@@ -308,7 +310,39 @@ export default function Chat() {
   const scrollViewRef = useRef();
 
   return (
-    <View style={{ flex: 1, marginTop: 20 }}>
+    <View style={{ flex: 1 }}>
+      <TouchableOpacity
+        onPress={() => handleSheetChanges(2)}
+        style={{
+          width: "100%",
+          backgroundColor: "#FFFFFF",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            style={{ width: 24, height: 24 }}
+            source={require("../assets/exceptio_icon.png")}
+          />
+          <Text style={{ color: "#3D576F", marginHorizontal: 4, fontSize: 16 }}>
+            IBIBAZO BYIHARIYE
+          </Text>
+        </View>
+        <Image
+          style={{ width: 24, height: 24 }}
+          source={require("../assets/chevron_right_icon.png")}
+        />
+      </TouchableOpacity>
       <ScrollView
         ref={scrollViewRef}
         onContentSizeChange={() =>
@@ -345,13 +379,7 @@ export default function Chat() {
             paddingVertical: 1,
           }}
         >
-          <TouchableOpacity onPress={() => handleSheetChanges(2)}>
-            <Image
-              style={{ width: 20, height: 20 }}
-              source={require("../assets/levels.png")}
-            />
-          </TouchableOpacity>
-          <RecordAudio />
+          <RecordAudio onSubmit={(uri) => submit(null, uri)} />
           <TextInput
             style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
             onChangeText={(text) => {

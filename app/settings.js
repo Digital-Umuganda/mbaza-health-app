@@ -32,7 +32,7 @@ export default function Settings() {
   const [names, setNames] = useState();
   const [phoneNumber, setPhoneNumber] = useState();
   const [oldPin, setOldPin] = useState();
-  const [newPin, setnewPin] = useState();
+  const [newPin, setNewPin] = useState();
   const [errorBag, setErrorBag] = useState({});
   const [profile, setProfile] = useState();
 
@@ -53,19 +53,18 @@ export default function Settings() {
     setProfile(profile);
   };
 
-  const updateUserCredentials = async () => {
+  const updateUserCredentials = async (isPin = false) => {
     const accessToken = await getData("access_token");
 
-    let profileBag = validateProfile();
-    let pinBag = validatePin();
+    let errors = !isPin ? validateProfile() : validatePin();
 
     if (
-      pinBag.oldPin == true ||
-      profileBag.district == true ||
-      profileBag.names == true ||
-      pinBag.newPin == true
+      errors.oldPin == true ||
+      errors.newPin == true ||
+      errors.district == true ||
+      errors.names == true
     ) {
-      setErrorBag({ ...profileBag, ...pinBag });
+      setErrorBag(errors);
       return;
     }
 
@@ -86,7 +85,11 @@ export default function Settings() {
       },
     };
 
-    const requests = [axios(config.updateProfile)];
+    const requests = [];
+
+    if (!isPin) {
+      requests.push(axios(config.updateProfile));
+    }
 
     if (oldPin != null && typeof oldPin == "string" && oldPin.length > 0) {
       config.changePassword = {
@@ -102,41 +105,35 @@ export default function Settings() {
         },
       };
 
-      requests.push(axios(config.changePassword));
+      if (isPin) {
+        requests.push(axios(config.changePassword));
+      }
     }
 
     setIsLoading(true);
-    const [updateProfile, changePassword] = await Promise.allSettled(requests);
+    const [updateProfile] = await Promise.allSettled(requests);
     setIsLoading(false);
 
     if (updateProfile.status == "fulfilled") {
       const { message } = updateProfile.value.data;
 
       Toast.show({
-        text1: "Umwirondoro wanjye",
+        text1: isPin ? "Guhindura PIN" : "Umwirondoro wanjye",
         text2: message,
       });
     } else if (updateProfile.status === "rejected") {
-      const errorMessage = updateProfile.reason;
-      console.log("Error Profile", errorMessage);
-    }
-
-    if (changePassword?.status === "fulfilled") {
-      Toast.show({
-        text1: "Guhindura PIN",
-        text2: "PIN yahinduwe neza",
-      });
-    } else if (changePassword?.status === "rejected") {
-      const errorMessage = changePassword.reason?.response?.data?.message;
+      const errorMessage = updateProfile.reason?.response?.data?.message;
       if (errorMessage?.toLowerCase()?.includes("password")) {
         Toast.show({
           type: "error",
-          text1: "Invalid PIN",
-          text2: "Please enter the correct PIN used for signup",
-          position: "bottom",
+          text1: isPin ? "Invalid PIN" : "My Profile",
+          text2: errorMessage,
         });
       }
     }
+
+    setNewPin("");
+    setOldPin("");
   };
 
   const validateProfile = () => {
@@ -172,18 +169,14 @@ export default function Settings() {
 
     let bag = {};
 
-    if (
-      data?.oldPassword != null &&
-      (typeof data.oldPassword != "string" || data.oldPassword.length < 5)
-    ) {
+    if (typeof data.oldPassword != "string" || data.oldPassword.length < 5) {
       bag.oldPin = true;
     }
 
     if (
-      data?.newPassword != null &&
-      (typeof data.newPassword != "string" ||
-        data.newPassword.length < 5 ||
-        data.newPassword == data.oldPassword)
+      typeof data.newPassword != "string" ||
+      data.newPassword.length < 5 ||
+      data.newPassword == data.oldPassword
     ) {
       bag.newPin = true;
     }
@@ -354,8 +347,7 @@ export default function Settings() {
             />
             <SelectDropdown
               data={elligibleDistricts}
-              onSelect={(selectedItem, index) => {
-                console.log({ selectedItem });
+              onSelect={(selectedItem) => {
                 setDistrict(selectedItem);
               }}
               buttonStyle={{
@@ -374,6 +366,14 @@ export default function Settings() {
             <Text style={{ color: "red" }}>Hitamo akarere ukoreramo.</Text>
           )}
         </View>
+        <Button
+          loading={isLoading}
+          onPress={() => updateUserCredentials(false)}
+          title="EMEZA"
+          backgroundColor="#478CCA"
+          textColor="white"
+        />
+        <View style={{ marginBottom: 32 }}></View>
         <Text style={{ color: "#3D576F", fontWeight: "600", fontSize: 14 }}>
           GUHINDURA PIN YANJYE
         </Text>
@@ -403,6 +403,7 @@ export default function Settings() {
                 flex: 1,
               }}
               keyboardType="numeric"
+              value={oldPin}
               onChangeText={(text) => setOldPin(text)}
               secureTextEntry={true}
             />
@@ -440,7 +441,8 @@ export default function Settings() {
                 flex: 1,
               }}
               keyboardType="numeric"
-              onChangeText={(text) => setnewPin(text)}
+              value={newPin}
+              onChangeText={(text) => setNewPin(text)}
               secureTextEntry={true}
             />
           </View>
@@ -452,8 +454,8 @@ export default function Settings() {
           )}
         </View>
         <Button
-          loading={isLoading}
-          onPress={updateUserCredentials}
+          loading={newPin && oldPin && isLoading}
+          onPress={() => updateUserCredentials(true)}
           title="EMEZA"
           backgroundColor="#478CCA"
           textColor="white"

@@ -4,6 +4,7 @@ import { Audio } from "expo-av";
 import { getData, url } from "../../utilities";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
+import { Ionicons } from '@expo/vector-icons';
 
 const RecordAudio = ({ onSubmit = () => {} }) => {
   const [recording, setRecording] = React.useState();
@@ -87,14 +88,11 @@ const RecordAudio = ({ onSubmit = () => {} }) => {
           paddingRight: 10,
         }}
       >
-        <Image
-          style={{ width: 24, height: 24 }}
-          source={
-            recording
-              ? require(`../../assets/record_stop.png`)
-              : require(`../../assets/mic_icon.png`)
-          }
-        />
+        {recording ? (
+          <Ionicons name="stop-circle" size={42} color="red" />
+        ) : (
+          <Ionicons name="mic-circle" size={42} color="green" />
+        )}
       </TouchableOpacity>
     </>
   );

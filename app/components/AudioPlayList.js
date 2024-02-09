@@ -23,6 +23,7 @@ import * as Font from "expo-font";
 import Slider from "@react-native-community/slider";
 
 import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 class Icon {
   constructor(module, width, height) {
@@ -41,33 +42,13 @@ class PlaylistItem {
   }
 }
 
-const ICON_PLAY_BUTTON = require("../../assets/images/play_button.png");
-const ICON_PAUSE_BUTTON = require("../../assets/images/pause_button.png");
-
-const ICON_LOOP_ALL_BUTTON = new Icon(
-  require("../../assets/images/loop_all_button.png"),
-  77,
-  35
-);
-const ICON_LOOP_ONE_BUTTON = new Icon(
-  require("../../assets/images/loop_one_button.png"),
-  77,
-  35
-);
-
-const ICON_MUTED_BUTTON = new Icon(
-  require("../../assets/images/muted_button.png"),
-  67,
-  58
-);
-
 const ICON_TRACK_1 = new Icon(
   require("../../assets/images/track_1.png"),
   166,
   5
 );
 const ICON_THUMB_1 = new Icon(
-  require("../../assets/images/thumb_1.png"),
+  require("../../assets/images/thumb_2.png"),
   18,
   19
 );
@@ -279,64 +260,6 @@ export default class AudioPlayList extends React.Component {
     }
   };
 
-  _onStopPressed = () => {
-    if (this.playbackInstance != null) {
-      this.playbackInstance.stopAsync();
-    }
-  };
-
-  _onForwardPressed = () => {
-    if (this.playbackInstance != null) {
-      this._advanceIndex(true);
-      this._updatePlaybackInstanceForIndex(this.state.shouldPlay);
-    }
-  };
-
-  _onBackPressed = () => {
-    if (this.playbackInstance != null) {
-      this._advanceIndex(false);
-      this._updatePlaybackInstanceForIndex(this.state.shouldPlay);
-    }
-  };
-
-  _onMutePressed = () => {
-    if (this.playbackInstance != null) {
-      this.playbackInstance.setIsMutedAsync(!this.state.muted);
-    }
-  };
-
-  _onLoopPressed = () => {
-    if (this.playbackInstance != null) {
-      this.playbackInstance.setIsLoopingAsync(
-        this.state.loopingType !== LOOPING_TYPE_ONE
-      );
-    }
-  };
-
-  _onVolumeSliderValueChange = (value) => {
-    if (this.playbackInstance != null) {
-      this.playbackInstance.setVolumeAsync(value);
-    }
-  };
-
-  _trySetRate = async (rate, shouldCorrectPitch) => {
-    if (this.playbackInstance != null) {
-      try {
-        await this.playbackInstance.setRateAsync(rate, shouldCorrectPitch);
-      } catch (error) {
-        // Rate changing could not be performed, possibly because the client's Android API is too old.
-      }
-    }
-  };
-
-  _onRateSliderSlidingComplete = async (value) => {
-    this._trySetRate(value * RATE_SCALE, this.state.shouldCorrectPitch);
-  };
-
-  _onPitchCorrectionPressed = async (value) => {
-    this._trySetRate(this.state.rate, !this.state.shouldCorrectPitch);
-  };
-
   _onSeekSliderValueChange = (value) => {
     if (this.playbackInstance != null && !this.isSeeking) {
       this.isSeeking = true;
@@ -400,23 +323,6 @@ export default class AudioPlayList extends React.Component {
     return "";
   }
 
-  _onSpeakerPressed = () => {
-    this.setState(
-      (state) => {
-        return { throughEarpiece: !state.throughEarpiece };
-      },
-      () =>
-        Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-          playThroughEarpieceAndroid: this.state.throughEarpiece,
-        })
-    );
-  };
-
   render() {
     return !this.state.fontLoaded ? (
       <View style={styles.emptyContainer} />
@@ -463,12 +369,11 @@ export default class AudioPlayList extends React.Component {
               onPress={this._onPlayPausePressed}
               disabled={this.state.isLoading}
             >
-              <Image
-                style={styles.button}
-                source={
-                  this.state.isPlaying ? ICON_PAUSE_BUTTON : ICON_PLAY_BUTTON
-                }
-              />
+              {this.state.isPlaying ? (
+                <Ionicons name="pause-circle" size={42} color="green" />
+              ) : (
+                <Ionicons name="play-circle" size={42} color="green" />
+              )}
             </TouchableHighlight>
           </View>
 
@@ -562,14 +467,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonsContainerTopRow: {
-    maxHeight: ICON_PLAY_BUTTON.height,
+    // maxHeight: ICON_PLAY_BUTTON.height,
     minWidth: 40,
     maxWidth: 40,
-  },
-  buttonsContainerMiddleRow: {
-    maxHeight: ICON_MUTED_BUTTON.height,
-    alignSelf: "stretch",
-    paddingRight: 20,
   },
   volumeContainer: {
     flex: 1,
@@ -578,18 +478,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     minWidth: DEVICE_WIDTH / 2.0,
     maxWidth: DEVICE_WIDTH / 2.0,
-  },
-  volumeSlider: {
-    width: DEVICE_WIDTH / 2.0 - ICON_MUTED_BUTTON.width,
-  },
-  buttonsContainerBottomRow: {
-    maxHeight: ICON_THUMB_1.height,
-    alignSelf: "stretch",
-    paddingRight: 20,
-    paddingLeft: 20,
-  },
-  rateSlider: {
-    width: DEVICE_WIDTH / 2.0,
   },
   buttonsContainerTextRow: {
     maxHeight: FONT_SIZE,

@@ -341,7 +341,6 @@ export default function Chat() {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 20,
           paddingVertical: 10,
           paddingHorizontal: 20,
         }}
@@ -370,7 +369,12 @@ export default function Chat() {
         onContentSizeChange={() =>
           scrollViewRef.current.scrollToEnd({ animated: true })
         }
-        style={{ paddingHorizontal: 20, marginBottom: 80 }}
+        style={{
+          paddingHorizontal: 20,
+          marginBottom: 80,
+          paddingTop: 16,
+          marginTop: 4,
+        }}
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}

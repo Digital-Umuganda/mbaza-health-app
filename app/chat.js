@@ -1,8 +1,9 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,8 +18,12 @@ import ChatRequest from "../chat-request";
 import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
+import Toast from "react-native-toast-message";
 
 export default function Chat() {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
@@ -28,6 +33,22 @@ export default function Chat() {
   const [chatId, setChatId] = useState(null);
   const [reloadResponse, setReloadResponse] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [action, setAction] = useState(null);
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      if (params.hasFeedback === "false" && messages.length > 0) {
+        e.preventDefault();
+        setModalVisible(true);
+
+        setAction(e.data.action);
+      }
+    });
+
+    return () => {
+      navigation.removeListener("beforeRemove");
+    };
+  }, [navigation, params, messages]);
 
   useEffect(() => {
     setTheChatUp();
@@ -35,7 +56,6 @@ export default function Chat() {
 
   useEffect(() => {
     if (params?.chatId) {
-      console.log("test chat id", params.chatId);
       setChatId(params.chatId);
     }
   }, [params]);
@@ -53,6 +73,41 @@ export default function Chat() {
     if (params.message) {
       setLastMessage(params.message);
       submit(params.message);
+    }
+  };
+
+  const sendFeedback = async (is_satisfied) => {
+    if (!chatId || isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const accessToken = await getData("access_token");
+      await axios.post(
+        `${url}/api/v1/feedbacks/${chatId}/feedback`,
+        {
+          is_satisfied,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (action) {
+        navigation.dispatch(action);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      Toast.show({
+        type: "error",
+        text1: "Feedback Failed",
+        text2: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+      setModalVisible(false);
     }
   };
 
@@ -78,7 +133,6 @@ export default function Chat() {
         const messagesCopy = Array.from(messages);
         Array.isArray(dataArray) &&
           dataArray.forEach((chat) => {
-            console.log({ chat });
             messagesCopy.push({
               message: {
                 answer: chat.kinyarwanda_question,
@@ -98,21 +152,14 @@ export default function Chat() {
       },
     };
 
-    console.log({ config });
-
     await axios(config)
       .then(function (response) {
-        // console.log({ data: response.data });
         // setChats(response.data);
       })
-      .catch(function (error) {
-        console.log(error);
-      });
+      .catch(function (error) {});
   };
 
   useEffect(() => {
-    console.log({ messages });
-
     if (
       Array.isArray(messages) &&
       messages.length > 0 &&
@@ -171,8 +218,6 @@ export default function Chat() {
       reactNative: { textStreaming: true },
     };
 
-    console.log({ requestOptions });
-
     setTranslating(true);
     try {
       const response = await fetch(`${url}/api/v1/chatbot`, requestOptions);
@@ -200,7 +245,6 @@ export default function Chat() {
         // You can do something with 'value' here.
         // For example, if it's text data, you can convert it to a string.
         let text = new TextDecoder().decode(value);
-        console.log({ text });
         try {
           if (countOccurrences(text, "{") == 1) {
             text = JSON.parse(text);
@@ -212,16 +256,12 @@ export default function Chat() {
             setReloadResponse(true);
           } else {
             const splitText = text.split("}");
-            console.log({ splits: splitText.length });
             let runs = 0;
             splitText.forEach((splitT) => {
               splitT = splitT.trim();
-              console.log({ splitT1: splitT.charAt(0), splitT });
               if (splitT.startsWith("{")) {
                 text = JSON.parse(splitT + "}");
-                console.log({ splitT, splitTObj: text });
                 responseText.answer += text.answer;
-                console.log({ responseText2: responseText, text });
                 responseText.created_at = text.created_at;
                 runs++;
               }
@@ -230,19 +270,16 @@ export default function Chat() {
             setChatId(text.chat_id);
             setLastAnswer(responseText.answer);
             setReloadResponse(true);
-            console.log({ runs, responseText1: responseText, text });
           }
         } catch (error) {
           if (error.message == "JSON Parse error: Unexpected character: {") {
             console.warn({ error: error.message, text });
           }
         }
-        console.log({ responseText, text });
         setLastResponse(responseText);
 
         if (!chatId && responseText.chat_id) {
           setChatId(responseText.chat_id);
-          console.log({ chatId: responseText.chat_id });
         }
         await readChunk();
       };
@@ -266,7 +303,6 @@ export default function Chat() {
   }
 
   useEffect(() => {
-    console.log({ lastResponse });
     const messagesCopy = Array.from(messages);
 
     if (
@@ -277,10 +313,6 @@ export default function Chat() {
     }
 
     if (lastResponse) {
-      if (lastResponse.answer.includes("\n")) {
-        console.log({ newLine: lastResponse });
-      }
-      // console.log({ lastResponse, lastResponseArray: lastResponse.answer.split('\n')  })
       messagesCopy.push({ message: lastResponse, type: "response" });
       setMessages(messagesCopy);
     }
@@ -308,6 +340,97 @@ export default function Chat() {
 
   return (
     <View style={{ flex: 1, marginTop: 20 }}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              maxWidth: "70%",
+            }}
+          >
+            <Text
+              style={{ fontSize: 24, textAlign: "center", color: "#3D576F" }}
+            >
+              Ese mwanyuzwe nibisubizo mwahawe?
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 48,
+                marginTop: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => sendFeedback(true)}
+                style={{
+                  backgroundColor: "rgba(60, 175, 74, 0.1)",
+                  paddingHorizontal: 32,
+                  paddingVertical: 12,
+                  borderRadius: 4,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <Image
+                  style={{ width: 15, height: 15 }}
+                  source={require("../assets/thumbs-up.png")}
+                />
+                <Text
+                  style={{
+                    color: "rgba(60, 175, 74, 1)",
+                    fontSize: 16,
+                  }}
+                >
+                  Yego
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => sendFeedback(false)}
+                style={{
+                  backgroundColor: "rgba(246, 66, 21, 0.1)",
+                  paddingHorizontal: 32,
+                  paddingVertical: 12,
+                  borderRadius: 4,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <Image
+                  style={{ width: 15, height: 15 }}
+                  source={require("../assets/thumbs-down.png")}
+                />
+                <Text
+                  style={{
+                    color: "rgba(246, 66, 21, 1)",
+                    fontSize: 16,
+                  }}
+                >
+                  Oya
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <ScrollView
         ref={scrollViewRef}
         onContentSizeChange={() =>
@@ -406,6 +529,7 @@ export default function Chat() {
         </View>
       </BottomSheet>
       <StatusBar style="light" />
+      <Toast />
     </View>
   );
 }

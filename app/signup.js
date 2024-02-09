@@ -51,7 +51,6 @@ export default function Signup() {
     axios
       .post(`${url}/api/v1/auth/signup`, data)
       .then(function (response) {
-        console.log(response);
         sendVerificationCode();
       })
       .catch(function (error) {
@@ -84,15 +83,11 @@ export default function Signup() {
       },
     };
 
-    console.log({ config });
     axios(config)
       .then(function (response) {
-        // console.log(response);
         storeData("phone_number", phone).then(() => router.push("/verify"));
       })
-      .catch(function (error) {
-        console.log(error);
-      });
+      .catch(function (error) {});
   };
 
   const validate = () => {
@@ -229,7 +224,6 @@ export default function Signup() {
             <SelectDropdown
               data={["MUSANZE", "GICUMBI", "NYANZA"]}
               onSelect={(selectedItem, index) => {
-                console.log({ selectedItem });
                 setDistrict(selectedItem);
               }}
               buttonStyle={{

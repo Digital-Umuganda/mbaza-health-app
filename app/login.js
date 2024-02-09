@@ -46,11 +46,9 @@ export default function Login() {
     }
 
     setIsLoading(true);
-    console.log({ data });
     axios
       .post(`${url}/api/v1/auth/login`, data)
       .then(function (response) {
-        console.log({ response });
         storeData("access_token", response.data.access_token).then(() =>
           storeData("phone_number", phoneNumber).then(() =>
             router.replace("/home")

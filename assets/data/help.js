@@ -76,4 +76,4 @@ Ninde ugenewe iyi App`,
 4. Ababiherewe uburenganzira nurwego rubishinzwe
     `,
   },
-];
+].sort((a, b) => a.title.localeCompare(b.title));

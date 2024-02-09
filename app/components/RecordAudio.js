@@ -4,9 +4,9 @@ import { Audio } from "expo-av";
 import { getData, url } from "../../utilities";
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
-const RecordAudio = ({ onSubmit = () => {} }) => {
+const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
   const [recording, setRecording] = React.useState();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
 
@@ -28,6 +28,7 @@ const RecordAudio = ({ onSubmit = () => {} }) => {
       );
       setRecording(recording);
       console.log("Recording started");
+      setIsRecording(true);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -35,6 +36,7 @@ const RecordAudio = ({ onSubmit = () => {} }) => {
 
   async function stopRecording() {
     setRecording(undefined);
+    setIsRecording(false);
     await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,

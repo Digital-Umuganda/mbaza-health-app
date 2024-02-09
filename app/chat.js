@@ -18,8 +18,11 @@ import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
+import AudioPlayList from "./components/AudioPlayList";
 
 export default function Chat() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordUrl, setRecordUrl] = useState(null);
   const [lastMessage, setLastMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
@@ -82,6 +85,7 @@ export default function Chat() {
               message: {
                 answer: chat.kinyarwanda_question,
                 requested_at: chat.requested_at,
+                audio_question: chat.audio_question,
               },
               type: "request",
             });
@@ -90,7 +94,6 @@ export default function Chat() {
                 answer: chat.kinyarwanda_response,
                 created_at: chat.created_at.split("T").join(" "),
                 audio_responses: chat.audio_responses,
-                audio_question: chat.audio_question,
               },
               type: "response",
             });
@@ -120,10 +123,13 @@ export default function Chat() {
   }, [messages]);
 
   const submit = (message = null, audio_question = null) => {
+    if (!message?.trim() && !audio_question?.trim()) {
+      return;
+    }
     const messagesCopy = Array.from(messages);
     messagesCopy.push({
       message: {
-        answer: message || lastMessage,
+        answer: message,
         requested_at: new Date(),
         audio_question,
       },
@@ -151,6 +157,7 @@ export default function Chat() {
   const chat = async () => {
     const lastQuestion = messages[messages.length - 1].message;
     const isAudio = lastQuestion.audio_question != null;
+
     let data = {
       kinyarwanda_question: lastQuestion.answer,
       requested_at: lastQuestion.requested_at,
@@ -192,7 +199,7 @@ export default function Chat() {
     setTranslating(true);
     try {
       const endpoint = isAudio
-        ? `/chatbot-audio?requested_at=${new Date().toISOString()}`
+        ? `/chatbot-audio?requested_at=${new Date().toISOString()}&chat_id=${chatId}`
         : "/kiny/chatbot";
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
 
@@ -222,8 +229,14 @@ export default function Chat() {
           text = JSON.parse(text);
           responseText.answer += text.answer;
           responseText.created_at = text.created_at;
-          responseText.audio_responses = text.audio_responses;
-          responseText.audio_question = text.audio_question;
+          if (lastResponse?.audio_responses?.length && text.audio_response) {
+            responseText.audio_responses = [
+              ...lastResponse.audio_responses,
+              text.audio_response,
+            ];
+          } else if (text.audio_response) {
+            responseText.audio_responses = [text.audio_response];
+          }
           setReloadResponse(true);
           setChatId(text.chat_id);
           setLastAnswer(responseText.answer);
@@ -237,8 +250,17 @@ export default function Chat() {
               text = JSON.parse(splitT + "}");
               responseText.answer += text.answer;
               responseText.created_at = text.created_at;
-              responseText.audio_responses = text.audio_responses;
-              responseText.audio_question = text.audio_question;
+              if (
+                lastResponse?.audio_responses?.length &&
+                text.audio_response
+              ) {
+                responseText.audio_responses = [
+                  ...lastResponse.audio_responses,
+                  text.audio_response,
+                ];
+              } else if (text.audio_response) {
+                responseText.audio_responses = [text.audio_response];
+              }
               runs++;
             }
           });
@@ -379,19 +401,40 @@ export default function Chat() {
             paddingVertical: 1,
           }}
         >
-          <RecordAudio onSubmit={(uri) => submit(null, uri)} />
-          <TextInput
-            style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
-            onChangeText={(text) => {
-              setLastMessage(text);
-            }}
-            value={lastMessage}
-            placeholder="Enter message"
-            placeholderTextColor="white"
-            multiline
-          />
+          {recordUrl ? (
+            <AudioPlayList playlist={[recordUrl]} />
+          ) : (
+            <>
+              <RecordAudio
+                onSubmit={(uri) => {
+                  setRecordUrl(uri);
+                }}
+                setIsRecording={setIsRecording}
+              />
+              <TextInput
+                style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
+                onChangeText={(text) => {
+                  setLastMessage(text);
+                }}
+                value={lastMessage}
+                placeholder="Enter message"
+                placeholderTextColor="white"
+                multiline
+              />
+            </>
+          )}
           <TouchableOpacity
-            onPress={() => submit()}
+            onPress={() => {
+              if (isRecording) {
+                return;
+              }
+              if (recordUrl) {
+                submit(null, recordUrl);
+                setRecordUrl(null);
+              } else {
+                submit(lastMessage);
+              }
+            }}
             style={{
               backgroundColor: "#478CCA",
               borderRadius: 3,

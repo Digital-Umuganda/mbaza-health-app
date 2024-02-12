@@ -1,8 +1,9 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +20,7 @@ import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Chat() {
   const [isRecording, setIsRecording] = useState(false);
@@ -32,6 +34,10 @@ export default function Chat() {
   const [chatId, setChatId] = useState(null);
   const [reloadResponse, setReloadResponse] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [action, setAction] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setTheChatUp();
@@ -113,6 +119,21 @@ export default function Chat() {
   };
 
   useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      if (params.hasFeedback === "false" && messages.length > 0) {
+        e.preventDefault();
+        setModalVisible(true);
+
+        setAction(e.data.action);
+      }
+    });
+
+    return () => {
+      navigation.removeListener("beforeRemove");
+    };
+  }, [navigation, params, messages]);
+
+  useEffect(() => {
     if (
       Array.isArray(messages) &&
       messages.length > 0 &&
@@ -153,6 +174,41 @@ export default function Chat() {
       pathname: "/custom-chat",
       params: { chatId },
     });
+
+  const sendFeedback = async (is_satisfied) => {
+    if (!chatId || isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const accessToken = await getData("access_token");
+      await axios.post(
+        `${url}/api/v1/feedbacks/${chatId}/feedback`,
+        {
+          is_satisfied,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (action) {
+        navigation.dispatch(action);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      Toast.show({
+        type: "error",
+        text1: "Feedback Failed",
+        text2: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+      setModalVisible(false);
+    }
+  };
 
   const chat = async () => {
     const lastQuestion = messages[messages.length - 1].message;
@@ -333,6 +389,97 @@ export default function Chat() {
 
   return (
     <View style={{ flex: 1 }}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              maxWidth: "70%",
+            }}
+          >
+            <Text
+              style={{ fontSize: 24, textAlign: "center", color: "#3D576F" }}
+            >
+              Ese mwanyuzwe nibisubizo mwahawe?
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 48,
+                marginTop: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => sendFeedback(true)}
+                style={{
+                  backgroundColor: "rgba(60, 175, 74, 0.1)",
+                  paddingHorizontal: 32,
+                  paddingVertical: 12,
+                  borderRadius: 4,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <Image
+                  style={{ width: 15, height: 15 }}
+                  source={require("../assets/thumbs-up.png")}
+                />
+                <Text
+                  style={{
+                    color: "rgba(60, 175, 74, 1)",
+                    fontSize: 16,
+                  }}
+                >
+                  Yego
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => sendFeedback(false)}
+                style={{
+                  backgroundColor: "rgba(246, 66, 21, 0.1)",
+                  paddingHorizontal: 32,
+                  paddingVertical: 12,
+                  borderRadius: 4,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <Image
+                  style={{ width: 15, height: 15 }}
+                  source={require("../assets/thumbs-down.png")}
+                />
+                <Text
+                  style={{
+                    color: "rgba(246, 66, 21, 1)",
+                    fontSize: 16,
+                  }}
+                >
+                  Oya
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <TouchableOpacity
         onPress={() => handleSheetChanges(2)}
         style={{
@@ -380,7 +527,7 @@ export default function Chat() {
         {renderMessages()}
       </ScrollView>
       <View
-        onPress={() => router.push("/help")}
+        // onPress={() => router.push("/help")}
         style={{
           position: "absolute",
           bottom: 0,
@@ -388,8 +535,8 @@ export default function Chat() {
           height: 64,
           borderRadius: 8,
           justifyContent: "center",
-          marginHorizontal: 20,
-          marginBottom: 20,
+          marginHorizontal: 16,
+          marginBottom: 8,
         }}
       >
         <View
@@ -406,7 +553,18 @@ export default function Chat() {
           }}
         >
           {recordUrl ? (
-            <AudioPlayList playlist={[recordUrl]} />
+            <>
+              <AudioPlayList playlist={[recordUrl]} />
+              <TouchableOpacity
+                onPress={() => setRecordUrl(null)}
+                style={{
+                  marginRight: 20,
+                  padding: 2,
+                }}
+              >
+                <Ionicons name="trash" size={24} color="red" />
+              </TouchableOpacity>
+            </>
           ) : (
             <>
               <RecordAudio

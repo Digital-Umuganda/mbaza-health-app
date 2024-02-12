@@ -370,9 +370,9 @@ export default class AudioPlayList extends React.Component {
               disabled={this.state.isLoading}
             >
               {this.state.isPlaying ? (
-                <Ionicons name="pause-circle" size={42} color="green" />
+                <Ionicons name="pause-circle" size={32} color="green" />
               ) : (
-                <Ionicons name="play-circle" size={42} color="green" />
+                <Ionicons name="play-circle" size={32} color="green" />
               )}
             </TouchableHighlight>
           </View>

@@ -1,9 +1,6 @@
 import React from "react";
-import { TouchableOpacity, Image } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Audio } from "expo-av";
-import { getData, url } from "../../utilities";
-import axios from "axios";
-import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
 
 const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
@@ -87,13 +84,13 @@ const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
         style={{
           borderRightWidth: 2,
           borderColor: "#CADEF0",
-          paddingRight: 10,
+          paddingRight: 4,
         }}
       >
         {recording ? (
-          <Ionicons name="stop-circle" size={42} color="red" />
+          <Ionicons name="stop-circle" size={38} color="red" />
         ) : (
-          <Ionicons name="mic-circle" size={42} color="green" />
+          <Ionicons name="mic-circle" size={38} color="green" />
         )}
       </TouchableOpacity>
     </>

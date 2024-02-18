@@ -1,4 +1,4 @@
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import AudioPlayList from "./app/components/AudioPlayList";
 import { useMemo } from "react";
 import { url } from "./utilities";
@@ -42,17 +42,24 @@ export default function ChatResponse({ content }) {
             C
           </Text>
         </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={{ color: "#3D576F8E" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 10,
+          }}
+        >
+          <Text style={{ color: "#3D576F8E", marginRight: 32 }}>
             {content != null &&
               content?.created_at !== undefined &&
               content?.created_at.includes(":") &&
               content.created_at.split(":", 2).join(":")}
           </Text>
+          {audios?.length ? <AudioPlayList playlist={audios} noSlider /> : null}
         </View>
       </View>
       <View style={{ padding: 15 }}>
-        {audios.length ? (
+        {/* {audios.length ? (
           <>
             <AudioPlayList playlist={audios} />
             <Text
@@ -66,7 +73,7 @@ export default function ChatResponse({ content }) {
               Transcript
             </Text>
           </>
-        ) : null}
+        ) : null} */}
 
         {content?.answer &&
           content.answer.split("\n").map((item, i) => (

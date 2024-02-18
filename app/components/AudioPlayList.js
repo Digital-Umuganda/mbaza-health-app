@@ -61,7 +61,6 @@ const BACKGROUND_COLOR = "transparent";
 const DISABLED_OPACITY = 0.5;
 const FONT_SIZE = 14;
 const LOADING_STRING = "... loading ...";
-const RATE_SCALE = 3.0;
 const VIDEO_CONTAINER_HEIGHT = (DEVICE_HEIGHT * 2.0) / 5.0 - FONT_SIZE * 2;
 
 export default class AudioPlayList extends React.Component {
@@ -71,6 +70,7 @@ export default class AudioPlayList extends React.Component {
     this.PLAYLIST = props.playlist?.map(
       (item) => new PlaylistItem("Audio", item, false)
     );
+    this.noSlider = props.noSlider;
     this.isSeeking = false;
     this.shouldPlayAtEndOfSeek = false;
     this.playbackInstance = null;
@@ -184,11 +184,12 @@ export default class AudioPlayList extends React.Component {
         loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL,
         shouldCorrectPitch: status.shouldCorrectPitch,
       });
-      if (status.didJustFinish && !status.isLooping) {
+      if (status.didJustFinish && this.index === this.PLAYLIST.length - 1) {
         this._advanceIndex(true);
-        this._updatePlaybackInstanceForIndex(
-          this.index !== this.PLAYLIST.length - 1
-        );
+        this._updatePlaybackInstanceForIndex(false);
+      } else if (status.didJustFinish && !status.isLooping) {
+        this._advanceIndex(true);
+        this._updatePlaybackInstanceForIndex(true);
       }
     } else {
       if (status.error) {
@@ -237,6 +238,8 @@ export default class AudioPlayList extends React.Component {
     this.index =
       (this.index + (forward ? 1 : this.PLAYLIST.length - 1)) %
       this.PLAYLIST.length;
+
+    console.log(this.index);
   }
 
   async _updatePlaybackInstanceForIndex(playing) {
@@ -370,41 +373,53 @@ export default class AudioPlayList extends React.Component {
               disabled={this.state.isLoading}
             >
               {this.state.isPlaying ? (
-                <Ionicons name="pause-circle" size={32} color="green" />
+                <Ionicons
+                  name={!this.noSlider ? "pause-circle" : "pause"}
+                  size={this.noSlider ? 24 : 32}
+                  color={this.noSlider ? "#3D576F" : "green"}
+                />
               ) : (
-                <Ionicons name="play-circle" size={32} color="green" />
+                <Ionicons
+                  name={!this.noSlider ? "play-circle" : "play"}
+                  size={this.noSlider ? 24 : 32}
+                  color={this.noSlider ? "#3D576F" : "green"}
+                />
               )}
             </TouchableHighlight>
           </View>
 
-          <Text
-            style={[
-              styles.text,
-              styles.timestamp,
-              { fontFamily: "cutive-mono-regular" },
-            ]}
-          >
-            {this._getTimestamp()}
-          </Text>
+          {!this.noSlider ? (
+            <>
+              <Text
+                style={[
+                  styles.text,
+                  styles.timestamp,
+                  { fontFamily: "cutive-mono-regular" },
+                ]}
+              >
+                {this._getTimestamp()}
+              </Text>
 
-          <View
-            style={[
-              styles.playbackContainer,
-              {
-                opacity: this.state.isLoading ? DISABLED_OPACITY : 1.0,
-              },
-            ]}
-          >
-            <Slider
-              style={styles.playbackSlider}
-              trackImage={ICON_TRACK_1.module}
-              thumbImage={ICON_THUMB_1.module}
-              value={this._getSeekSliderPosition()}
-              onValueChange={this._onSeekSliderValueChange}
-              onSlidingComplete={this._onSeekSliderSlidingComplete}
-              disabled={this.state.isLoading}
-            />
-          </View>
+              <View
+                style={[
+                  styles.playbackContainer,
+                  {
+                    opacity: this.state.isLoading ? DISABLED_OPACITY : 1.0,
+                  },
+                ]}
+              >
+                <Slider
+                  style={styles.playbackSlider}
+                  trackImage={ICON_TRACK_1.module}
+                  thumbImage={ICON_THUMB_1.module}
+                  value={this._getSeekSliderPosition()}
+                  onValueChange={this._onSeekSliderValueChange}
+                  onSlidingComplete={this._onSeekSliderSlidingComplete}
+                  disabled={this.state.isLoading}
+                />
+              </View>
+            </>
+          ) : null}
         </View>
 
         <View />

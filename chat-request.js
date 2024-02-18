@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import { url } from "./utilities";
 import AudioPlayList from "./app/components/AudioPlayList";
 
-export default function ChatRequest({ content, profile }) {
+export default function ChatRequest({ content }) {
   let date;
   let time;
   if (
@@ -53,7 +53,7 @@ export default function ChatRequest({ content, profile }) {
       >
         <View style={{ flex: 1, marginRight: 10 }}>
           <Text style={{ fontSize: 12, color: "#3CAF4A", fontWeight: "700" }}>
-            {profile && profile?.name != null && profile.name}
+            Me
           </Text>
         </View>
         <View style={{ flexDirection: "row" }}>
@@ -66,7 +66,7 @@ export default function ChatRequest({ content, profile }) {
         {audio ? (
           <>
             <AudioPlayList playlist={[audio]} />
-            {content.answer ? (
+            {/* {content.answer ? (
               <Text
                 style={{
                   color: "#9BB2C8",
@@ -77,10 +77,10 @@ export default function ChatRequest({ content, profile }) {
               >
                 Transcript
               </Text>
-            ) : null}
+            ) : null} */}
           </>
-        ) : null}
-        {content?.answer &&
+        ) : (
+          content?.answer &&
           content.answer.split("\n").map((item, i) => (
             <Text
               selectable={true}
@@ -94,7 +94,8 @@ export default function ChatRequest({ content, profile }) {
             >
               {item}
             </Text>
-          ))}
+          ))
+        )}
       </View>
     </View>
   );

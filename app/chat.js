@@ -60,8 +60,7 @@ export default function Chat() {
 
     await fetchMessagesFromChat();
     if (params.message) {
-      setLastMessage(params.message);
-      submit(params.message);
+      chat(params.message);
     }
   };
 
@@ -133,35 +132,6 @@ export default function Chat() {
     };
   }, [navigation, params, messages]);
 
-  useEffect(() => {
-    if (
-      Array.isArray(messages) &&
-      messages.length > 0 &&
-      messages[messages.length - 1].type === "request"
-    ) {
-      chat();
-    }
-  }, [messages]);
-
-  const submit = (message = null, audio_question = null) => {
-    if (!message?.trim() && !audio_question?.trim()) {
-      return;
-    }
-    const messagesCopy = Array.from(messages);
-    messagesCopy.push({
-      message: {
-        answer: message,
-        requested_at: new Date(),
-        audio_question,
-      },
-      type: "request",
-    });
-
-    setLastMessage("");
-
-    Array.isArray(messages) && setMessages(messagesCopy);
-  };
-
   // ref
   const bottomSheetRef = useRef(null);
 
@@ -210,18 +180,32 @@ export default function Chat() {
     }
   };
 
-  const chat = async () => {
-    const lastQuestion = messages[messages.length - 1].message;
-    const isAudio = lastQuestion.audio_question != null;
+  const chat = async (message = null, audio_question = null) => {
+    if (!message?.trim() && !audio_question?.trim()) {
+      return;
+    }
+    const isAudio = audio_question != null;
 
     let data = {
-      kinyarwanda_question: lastQuestion.answer,
-      requested_at: lastQuestion.requested_at,
+      kinyarwanda_question: message,
+      requested_at: new Date().toISOString(),
       with_audio: true,
     };
 
+    setMessages((prev) => [
+      ...prev,
+      {
+        message: {
+          answer: message,
+          requested_at: new Date(),
+          audio_question,
+        },
+        type: "request",
+      },
+    ]);
+
     if (isAudio) {
-      const uri = lastQuestion.audio_question;
+      const uri = audio_question;
       const filetype = uri.split(".").pop();
       const filename = uri.split("/").pop();
       const formData = new FormData();
@@ -254,9 +238,14 @@ export default function Chat() {
 
     setTranslating(true);
     try {
-      const endpoint = isAudio
-        ? `/chatbot-audio?requested_at=${new Date().toISOString()}&chat_id=${chatId}`
-        : "/kiny/chatbot";
+      let endpoint = isAudio ? `/chatbot-audio` : "/kiny/chatbot";
+
+      endpoint += `?requested_at=${new Date().toISOString()}`;
+
+      if (!!chatId) {
+        endpoint += `&chat_id=${chatId}`;
+      }
+
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
 
       if (!response.ok) {
@@ -285,16 +274,10 @@ export default function Chat() {
           text = JSON.parse(text);
           responseText.answer += text.answer;
           responseText.created_at = text.created_at;
-          if (lastResponse?.audio_responses?.length && text.audio_response) {
-            responseText.audio_responses = [
-              ...lastResponse.audio_responses,
-              text.audio_response,
-            ];
-          } else if (text.audio_response) {
-            responseText.audio_responses = [text.audio_response];
-          }
+          responseText.audio_responses = responseText.audio_responses?.length
+            ? [...responseText.audio_responses, text.audio_response]
+            : [text.audio_response];
           setReloadResponse(true);
-          setChatId(text.chat_id);
           setLastAnswer(responseText.answer);
           setReloadResponse(true);
         } else {
@@ -305,26 +288,20 @@ export default function Chat() {
             if (splitT.startsWith("{")) {
               text = JSON.parse(splitT + "}");
               responseText.answer += text.answer;
+              responseText.chat_id = text.chat_id;
               responseText.created_at = text.created_at;
-              if (
-                lastResponse?.audio_responses?.length &&
-                text.audio_response
-              ) {
-                responseText.audio_responses = [
-                  ...lastResponse.audio_responses,
-                  text.audio_response,
-                ];
-              } else if (text.audio_response) {
-                responseText.audio_responses = [text.audio_response];
-              }
+              responseText.audio_responses = responseText.audio_responses
+                ?.length
+                ? [...responseText.audio_responses, text.audio_response]
+                : [text.audio_response];
               runs++;
             }
           });
           setReloadResponse(true);
-          setChatId(text.chat_id);
           setLastAnswer(responseText.answer);
           setReloadResponse(true);
         }
+
         setLastResponse(responseText);
 
         if (!chatId && responseText.chat_id) {
@@ -335,7 +312,7 @@ export default function Chat() {
 
       await readChunk();
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     } finally {
       setTranslating(false);
     }
@@ -591,10 +568,11 @@ export default function Chat() {
                 return;
               }
               if (recordUrl) {
-                submit(null, recordUrl);
+                chat(null, recordUrl);
                 setRecordUrl(null);
               } else {
-                submit(lastMessage);
+                chat(lastMessage);
+                setLastMessage("");
               }
             }}
             style={{

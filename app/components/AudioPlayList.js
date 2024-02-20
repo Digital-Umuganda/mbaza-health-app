@@ -238,8 +238,6 @@ export default class AudioPlayList extends React.Component {
     this.index =
       (this.index + (forward ? 1 : this.PLAYLIST.length - 1)) %
       this.PLAYLIST.length;
-
-    console.log(this.index);
   }
 
   async _updatePlaybackInstanceForIndex(playing) {

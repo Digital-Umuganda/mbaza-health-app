@@ -29,10 +29,8 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
   const [lastResponse, setLastResponse] = useState(null);
-  const [lastAnswer, setLastAnswer] = useState(null);
   const params = useLocalSearchParams();
   const [chatId, setChatId] = useState(null);
-  const [reloadResponse, setReloadResponse] = useState(false);
   const [profile, setProfile] = useState(null);
   const [action, setAction] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -262,7 +260,6 @@ export default function Chat() {
         const { done, value } = await reader.read();
         if (done) {
           // setChatId(responseText.chat_id);
-          // setLastAnswer(responseText.answer)
           // setLastResponse(responseText);
           reader.releaseLock();
           return;
@@ -277,9 +274,6 @@ export default function Chat() {
           responseText.audio_responses = responseText.audio_responses?.length
             ? [...responseText.audio_responses, text.audio_response]
             : [text.audio_response];
-          setReloadResponse(true);
-          setLastAnswer(responseText.answer);
-          setReloadResponse(true);
         } else {
           const splitText = text.split("}");
           let runs = 0;
@@ -297,9 +291,6 @@ export default function Chat() {
               runs++;
             }
           });
-          setReloadResponse(true);
-          setLastAnswer(responseText.answer);
-          setReloadResponse(true);
         }
 
         setLastResponse(responseText);
@@ -342,7 +333,7 @@ export default function Chat() {
       messagesCopy.push({ message: lastResponse, type: "response" });
       setMessages(messagesCopy);
     }
-  }, [lastResponse?.answer, lastAnswer, reloadResponse]);
+  }, [lastResponse?.answer]);
 
   const renderMessage = (message, index) => {
     if (message.type == "request") {

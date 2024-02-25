@@ -11,7 +11,6 @@ import { router } from "expo-router";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { url } from "../utilities";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Button from "../Button";
 
 const ForgotPinScreen = () => {

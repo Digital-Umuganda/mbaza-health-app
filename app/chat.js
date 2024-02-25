@@ -16,11 +16,11 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import ChatResponse from "../chat-response";
 import ChatRequest from "../chat-request";
 import { fetchProfile, getData, getUserProfile, url } from "../utilities";
-import axios from "axios";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
+import instance from "../utilities/http";
 
 export default function Chat() {
   const [isRecording, setIsRecording] = useState(false);
@@ -66,14 +66,9 @@ export default function Chat() {
     if (!params.chatId) {
       return;
     }
-    const accessToken = await getData("access_token");
-    var config = {
+    const config = {
       method: "get",
       url: `${url}/api/v1/chats/${params.chatId}/messages`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
       transformResponse: (data) => {
         let dataArray = JSON.parse(data);
 
@@ -105,7 +100,7 @@ export default function Chat() {
       },
     };
 
-    await axios(config)
+    await instance(config)
       .then(function (response) {
         // console.log({ data: response.data });
         // setChats(response.data);
@@ -149,19 +144,9 @@ export default function Chat() {
     }
     try {
       setIsLoading(true);
-      const accessToken = await getData("access_token");
-      await axios.post(
-        `${url}/api/v1/feedbacks/${chatId}/feedback`,
-        {
-          is_satisfied,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await instance.post(`${url}/api/v1/feedbacks/${chatId}/feedback`, {
+        is_satisfied,
+      });
       if (action) {
         navigation.dispatch(action);
       }

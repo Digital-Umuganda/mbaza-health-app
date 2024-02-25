@@ -15,9 +15,9 @@ import { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SelectDropdown from "react-native-select-dropdown";
-import axios from "axios";
 import Toast from "react-native-toast-message";
 import * as Updates from "expo-updates";
+import instance from "../utilities/http";
 
 const checkSession = async () => {
   const accessToken = await getData("access_token");
@@ -88,7 +88,7 @@ export default function Settings() {
     const requests = [];
 
     if (!isPin) {
-      requests.push(axios(config.updateProfile));
+      requests.push(instance(config.updateProfile));
     }
 
     if (oldPin != null && typeof oldPin == "string" && oldPin.length > 0) {
@@ -106,7 +106,7 @@ export default function Settings() {
       };
 
       if (isPin) {
-        requests.push(axios(config.changePassword));
+        requests.push(instance(config.changePassword));
       }
     }
 

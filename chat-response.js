@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { url } from "./utilities";
 
 export default function ChatResponse({ content }) {
-  // console.log(content);
   const audios = useMemo(() => {
     if (!content?.audio_responses?.length) {
       return [];

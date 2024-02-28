@@ -15,7 +15,7 @@ import { Path, Svg } from "react-native-svg";
 import BottomSheet from "@gorhom/bottom-sheet";
 import ChatResponse from "../chat-response";
 import ChatRequest from "../chat-request";
-import { fetchProfile, getData, getUserProfile, url } from "../utilities";
+import { getData, url } from "../utilities";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
@@ -28,39 +28,22 @@ export default function Chat() {
   const [lastMessage, setLastMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
-  const [lastResponse, setLastResponse] = useState(null);
   const params = useLocalSearchParams();
   const [chatId, setChatId] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [action, setAction] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setTheChatUp();
-  }, []);
-
-  useEffect(() => {
     if (params?.chatId) {
       setChatId(params.chatId);
+      fetchMessagesFromChat();
     }
-  }, [params]);
-
-  const setTheChatUp = async () => {
-    let profile = JSON.parse(await getUserProfile());
-
-    if (profile == null) {
-      profile = await fetchProfile();
-    }
-
-    setProfile(profile);
-
-    await fetchMessagesFromChat();
     if (params.message) {
       chat(params.message);
     }
-  };
+  }, [params]);
 
   const fetchMessagesFromChat = async () => {
     if (!params.chatId) {
@@ -112,7 +95,7 @@ export default function Chat() {
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      if (params.hasFeedback === "false" && messages.length > 0) {
+      if (params.hasFeedback === "false" && chatId) {
         e.preventDefault();
         setModalVisible(true);
 
@@ -123,7 +106,7 @@ export default function Chat() {
     return () => {
       navigation.removeListener("beforeRemove");
     };
-  }, [navigation, params, messages]);
+  }, [navigation, params, chatId]);
 
   // ref
   const bottomSheetRef = useRef(null);
@@ -169,11 +152,17 @@ export default function Chat() {
     }
     const isAudio = audio_question != null;
 
+    const currentChatId = chatId || params.chatId;
+
     let data = {
       kinyarwanda_question: message,
       requested_at: new Date().toISOString(),
       with_audio: true,
     };
+
+    if (currentChatId) {
+      data.chat_id = currentChatId;
+    }
 
     setMessages((prev) => [
       ...prev,
@@ -202,10 +191,6 @@ export default function Chat() {
       data = JSON.stringify(data);
     }
 
-    if (chatId != null) {
-      data.chat_id = chatId || params.chatId;
-    }
-
     const accessToken = await getData("access_token");
 
     const requestOptions = {
@@ -225,8 +210,8 @@ export default function Chat() {
 
       endpoint += `?requested_at=${new Date().toISOString()}`;
 
-      if (!!chatId) {
-        endpoint += `&chat_id=${chatId}`;
+      if (currentChatId) {
+        endpoint += `&chat_id=${currentChatId}`;
       }
 
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
@@ -244,8 +229,18 @@ export default function Chat() {
       const readChunk = async () => {
         const { done, value } = await reader.read();
         if (done) {
-          // setChatId(responseText.chat_id);
-          // setLastResponse(responseText);
+          if (responseText.chat_id && !chatId) {
+            setChatId(responseText.chat_id);
+          }
+          if (responseText.answer) {
+            setMessages((prev) => {
+              // remove last if type was response
+              if (prev.length > 0 && prev[prev.length - 1].type == "response") {
+                prev.pop();
+              }
+              return [...prev, { message: responseText, type: "response" }];
+            });
+          }
           reader.releaseLock();
           return;
         }
@@ -259,6 +254,7 @@ export default function Chat() {
           responseText.audio_responses = responseText.audio_responses?.length
             ? [...responseText.audio_responses, text.audio_response]
             : [text.audio_response];
+          responseText.chat_id = text.chat_id;
         } else {
           const splitText = text.split("}");
           let runs = 0;
@@ -278,11 +274,13 @@ export default function Chat() {
           });
         }
 
-        setLastResponse(responseText);
-
-        if (!chatId && responseText.chat_id) {
-          setChatId(responseText.chat_id);
-        }
+        setMessages((prev) => {
+          // remove last if type was response
+          if (prev.length > 0 && prev[prev.length - 1].type == "response") {
+            prev.pop();
+          }
+          return [...prev, { message: responseText, type: "response" }];
+        });
         await readChunk();
       };
 
@@ -304,27 +302,9 @@ export default function Chat() {
     return count;
   }
 
-  useEffect(() => {
-    const messagesCopy = Array.from(messages);
-
-    if (
-      messagesCopy.length > 0 &&
-      messagesCopy[messagesCopy.length - 1].type == "response"
-    ) {
-      messagesCopy.pop();
-    }
-
-    if (lastResponse) {
-      messagesCopy.push({ message: lastResponse, type: "response" });
-      setMessages(messagesCopy);
-    }
-  }, [lastResponse?.answer]);
-
   const renderMessage = (message, index) => {
     if (message.type == "request") {
-      return (
-        <ChatRequest key={index} content={message.message} profile={profile} />
-      );
+      return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
       return <ChatResponse key={index} content={message.message} />;
     }

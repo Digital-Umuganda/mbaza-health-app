@@ -3,6 +3,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getData, url } from ".";
 import { router } from "expo-router";
 
+export const onLogout = async () => {
+  await AsyncStorage.clear();
+  router.replace("login");
+}
+
 const instance = axios.create({
   baseURL: url,
   headers: {
@@ -24,11 +29,12 @@ instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response.status === 401) {
-      await AsyncStorage.clear();
-      router.replace("login");
+      await onLogout();
     }
     return Promise.reject(error);
   }
 );
+
+
 
 export default instance;

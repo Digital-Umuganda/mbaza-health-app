@@ -20,7 +20,7 @@ import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
-import instance from "../utilities/http";
+import instance, { onLogout } from "../utilities/http";
 
 export default function Chat() {
   const [isRecording, setIsRecording] = useState(false);
@@ -216,6 +216,11 @@ export default function Chat() {
 
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
 
+      if (response.status === 401) {
+        await onLogout();
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -251,9 +256,7 @@ export default function Chat() {
           text = JSON.parse(text);
           responseText.answer += text.answer;
           responseText.created_at = text.created_at;
-          responseText.audio_responses = responseText.audio_responses?.length
-            ? [...responseText.audio_responses, text.audio_response]
-            : [text.audio_response];
+          responseText.audio_responses = text.audio_responses;
           responseText.chat_id = text.chat_id;
         } else {
           const splitText = text.split("}");
@@ -265,10 +268,7 @@ export default function Chat() {
               responseText.answer += text.answer;
               responseText.chat_id = text.chat_id;
               responseText.created_at = text.created_at;
-              responseText.audio_responses = responseText.audio_responses
-                ?.length
-                ? [...responseText.audio_responses, text.audio_response]
-                : [text.audio_response];
+              responseText.audio_responses = text.audio_responses;
               runs++;
             }
           });

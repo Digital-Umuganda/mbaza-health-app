@@ -1,21 +1,15 @@
 import {
-  Image,
-  KeyboardAvoidingView,
-  SafeAreaView,
   Text,
   TextInput,
   View,
 } from "react-native";
 import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
-import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import SelectDropdown from "react-native-select-dropdown";
-import axios from "axios";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { getData, storeData, url } from "../utilities";
 import { Path, Svg } from "react-native-svg";
-import { fetch } from "../utilities/react-native-fetch-api/fetch";
 
 export default function Signup() {
   const [sex, setSex] = useState();

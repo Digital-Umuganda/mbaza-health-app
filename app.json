@@ -23,20 +23,30 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.digitalumuganda.mbazahealth"
+      "package": "com.digitalumuganda.mbazahealth",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
     ],
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "0f2f7984-bb62-4594-aeea-0167eee1dcc6"
+        "projectId": "0e12cdab-c803-426a-b401-cbc364a28a0a"
       }
     }
   }

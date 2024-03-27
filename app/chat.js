@@ -15,29 +15,87 @@ import { Path, Svg } from "react-native-svg";
 import BottomSheet from "@gorhom/bottom-sheet";
 import ChatResponse from "../chat-response";
 import ChatRequest from "../chat-request";
-import { fetchProfile, getData, getUserProfile, url } from "../utilities";
-import axios from "axios";
+import { getData, url } from "../utilities";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
-import Toast from "react-native-toast-message";
+import RecordAudio from "./components/RecordAudio";
+import AudioPlayList from "./components/AudioPlayList";
+import { Ionicons } from "@expo/vector-icons";
+import instance, { onLogout } from "../utilities/http";
 
 export default function Chat() {
-  const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordUrl, setRecordUrl] = useState(null);
   const [lastMessage, setLastMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [translating, setTranslating] = useState(false);
-  const [lastResponse, setLastResponse] = useState(null);
-  const [lastAnswer, setLastAnswer] = useState(null);
   const params = useLocalSearchParams();
   const [chatId, setChatId] = useState(null);
-  const [reloadResponse, setReloadResponse] = useState(false);
-  const [profile, setProfile] = useState(null);
   const [action, setAction] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (params?.chatId) {
+      setChatId(params.chatId);
+      fetchMessagesFromChat();
+    }
+    if (params.message) {
+      chat(params.message);
+    }
+  }, [params]);
+
+  const fetchMessagesFromChat = async () => {
+    if (!params.chatId) {
+      return;
+    }
+    const config = {
+      method: "get",
+      url: `${url}/api/v1/chats/${params.chatId}/messages`,
+      transformResponse: (data) => {
+        let dataArray = JSON.parse(data);
+
+        if (Array.isArray(dataArray)) {
+          dataArray = dataArray.reverse();
+        }
+
+        const messagesCopy = Array.from(messages);
+        Array.isArray(dataArray) &&
+          dataArray.forEach((chat) => {
+            messagesCopy.push({
+              message: {
+                answer: chat.kinyarwanda_question,
+                requested_at: chat.requested_at,
+                audio_question: chat.audio_question,
+              },
+              type: "request",
+            });
+            messagesCopy.push({
+              message: {
+                answer: chat.kinyarwanda_response,
+                created_at: chat.created_at.split("T").join(" "),
+                audio_responses: chat.audio_responses,
+              },
+              type: "response",
+            });
+          });
+        setMessages(messagesCopy);
+      },
+    };
+
+    await instance(config)
+      .then(function (response) {
+        // console.log({ data: response.data });
+        // setChats(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      if (params.hasFeedback === "false" && messages.length > 0) {
+      if (params.hasFeedback === "false" && chatId) {
         e.preventDefault();
         setModalVisible(true);
 
@@ -48,33 +106,20 @@ export default function Chat() {
     return () => {
       navigation.removeListener("beforeRemove");
     };
-  }, [navigation, params, messages]);
+  }, [navigation, params, chatId]);
 
-  useEffect(() => {
-    setTheChatUp();
-  }, []);
+  // ref
+  const bottomSheetRef = useRef(null);
 
-  useEffect(() => {
-    if (params?.chatId) {
-      setChatId(params.chatId);
-    }
-  }, [params]);
+  // variables
+  const snapPoints = useMemo(() => ["25%", "50%", "100%"], []);
 
-  const setTheChatUp = async () => {
-    let profile = JSON.parse(await getUserProfile());
-
-    if (profile == null) {
-      profile = await fetchProfile();
-    }
-
-    setProfile(profile);
-
-    await fetchMessagesFromChat();
-    if (params.message) {
-      setLastMessage(params.message);
-      submit(params.message);
-    }
-  };
+  // callbacks
+  const handleSheetChanges = () =>
+    router.replace({
+      pathname: "/custom-chat",
+      params: { chatId },
+    });
 
   const sendFeedback = async (is_satisfied) => {
     if (!chatId || isLoading) {
@@ -82,19 +127,9 @@ export default function Chat() {
     }
     try {
       setIsLoading(true);
-      const accessToken = await getData("access_token");
-      await axios.post(
-        `${url}/api/v1/feedbacks/${chatId}/feedback`,
-        {
-          is_satisfied,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await instance.post(`${url}/api/v1/feedbacks/${chatId}/feedback`, {
+        is_satisfied,
+      });
       if (action) {
         navigation.dispatch(action);
       }
@@ -111,100 +146,50 @@ export default function Chat() {
     }
   };
 
-  const fetchMessagesFromChat = async () => {
-    if (!params.chatId) {
+  const chat = async (message = null, audio_question = null) => {
+    if (!message?.trim() && !audio_question?.trim()) {
       return;
     }
-    const accessToken = await getData("access_token");
-    var config = {
-      method: "get",
-      url: `${url}/api/v1/chats/${params.chatId}/messages`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      transformResponse: (data) => {
-        let dataArray = JSON.parse(data);
+    const isAudio = audio_question != null;
 
-        if (Array.isArray(dataArray)) {
-          dataArray = dataArray.reverse();
-        }
+    const currentChatId = chatId || params.chatId;
 
-        const messagesCopy = Array.from(messages);
-        Array.isArray(dataArray) &&
-          dataArray.forEach((chat) => {
-            messagesCopy.push({
-              message: {
-                answer: chat.kinyarwanda_question,
-                requested_at: chat.requested_at,
-              },
-              type: "request",
-            });
-            messagesCopy.push({
-              message: {
-                answer: chat.kinyarwanda_response,
-                created_at: chat.created_at.split("T").join(" "),
-              },
-              type: "response",
-            });
-          });
-        setMessages(messagesCopy);
-      },
-    };
-
-    await axios(config)
-      .then(function (response) {
-        // setChats(response.data);
-      })
-      .catch(function (error) {});
-  };
-
-  useEffect(() => {
-    if (
-      Array.isArray(messages) &&
-      messages.length > 0 &&
-      messages[messages.length - 1].type === "request"
-    ) {
-      chat();
-    }
-  }, [messages]);
-
-  const submit = (message = null) => {
-    const messagesCopy = Array.from(messages);
-    messagesCopy.push({
-      message: { answer: message || lastMessage, requested_at: new Date() },
-      type: "request",
-    });
-
-    setLastMessage("");
-
-    Array.isArray(messages) && setMessages(messagesCopy);
-  };
-
-  // ref
-  const bottomSheetRef = useRef(null);
-
-  // variables
-  const snapPoints = useMemo(() => ["25%", "50%", "100%"], []);
-
-  // callbacks
-  const handleSheetChanges = () =>
-    router.replace({
-      pathname: "/custom-chat",
-      params: { chatId },
-    });
-
-  const chat = async () => {
     let data = {
-      kinyarwanda_question: messages[messages.length - 1].message.answer,
-      requested_at: messages[messages.length - 1].message.requested_at,
+      kinyarwanda_question: message,
+      requested_at: new Date().toISOString(),
+      with_audio: true,
     };
 
-    if (chatId != null) {
-      data.chat_id = chatId || params.chatId;
+    if (currentChatId) {
+      data.chat_id = currentChatId;
     }
 
-    data = JSON.stringify(data);
+    setMessages((prev) => [
+      ...prev,
+      {
+        message: {
+          answer: message,
+          requested_at: new Date(),
+          audio_question,
+        },
+        type: "request",
+      },
+    ]);
+
+    if (isAudio) {
+      const uri = audio_question;
+      const filetype = uri.split(".").pop();
+      const filename = uri.split("/").pop();
+      const formData = new FormData();
+      formData.append("audio_file", {
+        uri,
+        type: `audio/${filetype}`,
+        name: filename,
+      });
+      data = formData;
+    } else {
+      data = JSON.stringify(data);
+    }
 
     const accessToken = await getData("access_token");
 
@@ -212,7 +197,8 @@ export default function Chat() {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        "Content-Type": isAudio ? "multipart/form-data" : "application/json",
+        Accept: "application/json",
       },
       body: data,
       reactNative: { textStreaming: true },
@@ -220,7 +206,20 @@ export default function Chat() {
 
     setTranslating(true);
     try {
-      const response = await fetch(`${url}/api/v1/chatbot`, requestOptions);
+      let endpoint = isAudio ? `/chatbot-audio` : "/kiny/chatbot";
+
+      endpoint += `?requested_at=${new Date().toISOString()}`;
+
+      if (currentChatId) {
+        endpoint += `&chat_id=${currentChatId}`;
+      }
+
+      const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);
+
+      if (response.status === 401) {
+        await onLogout();
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -235,58 +234,59 @@ export default function Chat() {
       const readChunk = async () => {
         const { done, value } = await reader.read();
         if (done) {
-          console.info("stream done");
-          // setChatId(responseText.chat_id);
-          // setLastAnswer(responseText.answer)
-          // setLastResponse(responseText);
+          if (responseText.chat_id && !chatId) {
+            setChatId(responseText.chat_id);
+          }
+          if (responseText.answer) {
+            setMessages((prev) => {
+              // remove last if type was response
+              if (prev.length > 0 && prev[prev.length - 1].type == "response") {
+                prev.pop();
+              }
+              return [...prev, { message: responseText, type: "response" }];
+            });
+          }
           reader.releaseLock();
           return;
         }
         // You can do something with 'value' here.
         // For example, if it's text data, you can convert it to a string.
         let text = new TextDecoder().decode(value);
-        try {
-          if (countOccurrences(text, "{") == 1) {
-            text = JSON.parse(text);
-            responseText.answer += text.answer;
-            responseText.created_at = text.created_at;
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-          } else {
-            const splitText = text.split("}");
-            let runs = 0;
-            splitText.forEach((splitT) => {
-              splitT = splitT.trim();
-              if (splitT.startsWith("{")) {
-                text = JSON.parse(splitT + "}");
-                responseText.answer += text.answer;
-                responseText.created_at = text.created_at;
-                runs++;
-              }
-            });
-            setReloadResponse(true);
-            setChatId(text.chat_id);
-            setLastAnswer(responseText.answer);
-            setReloadResponse(true);
-          }
-        } catch (error) {
-          if (error.message == "JSON Parse error: Unexpected character: {") {
-            console.warn({ error: error.message, text });
-          }
+        if (countOccurrences(text, "{") == 1) {
+          text = JSON.parse(text);
+          responseText.answer += text.answer;
+          responseText.created_at = text.created_at;
+          responseText.audio_responses = text.audio_responses;
+          responseText.chat_id = text.chat_id;
+        } else {
+          const splitText = text.split("}");
+          let runs = 0;
+          splitText.forEach((splitT) => {
+            splitT = splitT.trim();
+            if (splitT.startsWith("{")) {
+              text = JSON.parse(splitT + "}");
+              responseText.answer += text.answer;
+              responseText.chat_id = text.chat_id;
+              responseText.created_at = text.created_at;
+              responseText.audio_responses = text.audio_responses;
+              runs++;
+            }
+          });
         }
-        setLastResponse(responseText);
 
-        if (!chatId && responseText.chat_id) {
-          setChatId(responseText.chat_id);
-        }
+        setMessages((prev) => {
+          // remove last if type was response
+          if (prev.length > 0 && prev[prev.length - 1].type == "response") {
+            prev.pop();
+          }
+          return [...prev, { message: responseText, type: "response" }];
+        });
         await readChunk();
       };
 
       await readChunk();
     } catch (error) {
-      console.warn({ message: error.message });
+      console.log(error);
     } finally {
       setTranslating(false);
     }
@@ -302,27 +302,9 @@ export default function Chat() {
     return count;
   }
 
-  useEffect(() => {
-    const messagesCopy = Array.from(messages);
-
-    if (
-      messagesCopy.length > 0 &&
-      messagesCopy[messagesCopy.length - 1].type == "response"
-    ) {
-      messagesCopy.pop();
-    }
-
-    if (lastResponse) {
-      messagesCopy.push({ message: lastResponse, type: "response" });
-      setMessages(messagesCopy);
-    }
-  }, [lastResponse?.answer, lastAnswer, reloadResponse]);
-
   const renderMessage = (message, index) => {
     if (message.type == "request") {
-      return (
-        <ChatRequest key={index} content={message.message} profile={profile} />
-      );
+      return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
       return <ChatResponse key={index} content={message.message} />;
     }
@@ -339,7 +321,7 @@ export default function Chat() {
   const scrollViewRef = useRef();
 
   return (
-    <View style={{ flex: 1, marginTop: 20 }}>
+    <View style={{ flex: 1 }}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -431,18 +413,54 @@ export default function Chat() {
           </View>
         </View>
       </Modal>
+      <TouchableOpacity
+        onPress={() => handleSheetChanges(2)}
+        style={{
+          width: "100%",
+          backgroundColor: "#FFFFFF",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            style={{ width: 24, height: 24 }}
+            source={require("../assets/exceptio_icon.png")}
+          />
+          <Text style={{ color: "#3D576F", marginHorizontal: 4, fontSize: 16 }}>
+            IBIBAZO BYIHARIYE
+          </Text>
+        </View>
+        <Image
+          style={{ width: 24, height: 24 }}
+          source={require("../assets/chevron_right_icon.png")}
+        />
+      </TouchableOpacity>
       <ScrollView
         ref={scrollViewRef}
         onContentSizeChange={() =>
           scrollViewRef.current.scrollToEnd({ animated: true })
         }
-        style={{ paddingHorizontal: 20, marginBottom: 80 }}
+        style={{
+          paddingHorizontal: 20,
+          marginBottom: 80,
+          paddingTop: 16,
+          marginTop: 4,
+        }}
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}
       </ScrollView>
       <View
-        onPress={() => router.push("/help")}
+        // onPress={() => router.push("/help")}
         style={{
           position: "absolute",
           bottom: 0,
@@ -450,8 +468,8 @@ export default function Chat() {
           height: 64,
           borderRadius: 8,
           justifyContent: "center",
-          marginHorizontal: 20,
-          marginBottom: 20,
+          marginHorizontal: 16,
+          marginBottom: 8,
         }}
       >
         <View
@@ -467,24 +485,52 @@ export default function Chat() {
             paddingVertical: 1,
           }}
         >
-          <TouchableOpacity onPress={() => handleSheetChanges(2)}>
-            <Image
-              style={{ width: 20, height: 20 }}
-              source={require("../assets/levels.png")}
-            />
-          </TouchableOpacity>
-          <TextInput
-            style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
-            onChangeText={(text) => {
-              setLastMessage(text);
-            }}
-            value={lastMessage}
-            placeholder="Enter message"
-            placeholderTextColor="white"
-            multiline
-          />
+          {recordUrl ? (
+            <>
+              <AudioPlayList playlist={[recordUrl]} />
+              <TouchableOpacity
+                onPress={() => setRecordUrl(null)}
+                style={{
+                  marginRight: 20,
+                  padding: 2,
+                }}
+              >
+                <Ionicons name="trash" size={24} color="red" />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <RecordAudio
+                onSubmit={(uri) => {
+                  setRecordUrl(uri);
+                }}
+                setIsRecording={setIsRecording}
+              />
+              <TextInput
+                style={{ flex: 1, fontSize: 16, height: 64, paddingLeft: 10 }}
+                onChangeText={(text) => {
+                  setLastMessage(text);
+                }}
+                value={lastMessage}
+                placeholder="Enter message"
+                placeholderTextColor="white"
+                multiline
+              />
+            </>
+          )}
           <TouchableOpacity
-            onPress={() => submit()}
+            onPress={() => {
+              if (isRecording) {
+                return;
+              }
+              if (recordUrl) {
+                chat(null, recordUrl);
+                setRecordUrl(null);
+              } else {
+                chat(lastMessage);
+                setLastMessage("");
+              }
+            }}
             style={{
               backgroundColor: "#478CCA",
               borderRadius: 3,
@@ -529,7 +575,6 @@ export default function Chat() {
         </View>
       </BottomSheet>
       <StatusBar style="light" />
-      <Toast />
     </View>
   );
 }

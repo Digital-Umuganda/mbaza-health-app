@@ -87,7 +87,7 @@ export default function Signup() {
       .then(function (response) {
         storeData("phone_number", phone).then(() => router.push("/verify"));
       })
-      .catch(function (error) {});
+      .catch(function (error) { });
   };
 
   const validate = () => {
@@ -283,7 +283,7 @@ export default function Signup() {
           backgroundColor="transparent"
           textColor="#3D576F"
           underlineText={true}
-          onPress={router.back}
+          onPress={() => router.replace("/")}
         />
         <StatusBar style="light" />
         <Toast />

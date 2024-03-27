@@ -1,27 +1,19 @@
-import axios from "axios";
 import { router, useNavigation } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { fetchProfile, getData, url } from "../utilities";
+import { fetchProfile } from "../utilities";
 import { useCallback, useEffect, useState } from "react";
+import instance from "../utilities/http";
 
 export default function Home() {
   const [chats, setChats] = useState([]);
   const navigation = useNavigation();
 
   const fetchChats = async () => {
-    const accessToken = await getData("access_token");
-    const config = {
-      method: "get",
-      url: `${url}/api/v1/chats?sort_field=created_at&sort_order=desc`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    };
-
     try {
-      const response = await axios(config);
+      const response = await instance.get(
+        "/api/v1/chats?sort_field=created_at&sort_order=desc"
+      );
 
       let data = response.data;
 

@@ -52,9 +52,6 @@ const ICON_THUMB_1 = new Icon(
   19
 );
 
-const LOOPING_TYPE_ALL = 0;
-const LOOPING_TYPE_ONE = 1;
-
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get("window");
 const BACKGROUND_COLOR = "transparent";
 const DISABLED_OPACITY = 0.5;
@@ -76,7 +73,6 @@ export default class AudioPlayList extends React.Component {
     this.state = {
       showVideo: false,
       playbackInstanceName: LOADING_STRING,
-      loopingType: LOOPING_TYPE_ALL,
       muted: false,
       playbackInstancePosition: null,
       playbackInstanceDuration: null,
@@ -122,12 +118,11 @@ export default class AudioPlayList extends React.Component {
       shouldCorrectPitch: this.state.shouldCorrectPitch,
       volume: this.state.volume,
       isMuted: this.state.muted,
-      isLooping: this.state.loopingType === LOOPING_TYPE_ONE,
       // // UNCOMMENT THIS TO TEST THE OLD androidImplementation:
       // androidImplementation: 'MediaPlayer',
     };
 
-    const { sound, status } = await Audio.Sound.createAsync(
+    const { sound } = await Audio.Sound.createAsync(
       source,
       initialStatus,
       this._onPlaybackStatusUpdate
@@ -172,13 +167,12 @@ export default class AudioPlayList extends React.Component {
         rate: status.rate,
         muted: status.isMuted,
         volume: status.volume,
-        loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL,
         shouldCorrectPitch: status.shouldCorrectPitch,
       });
       if (status.didJustFinish && this.index === this.PLAYLIST.length - 1) {
         this._advanceIndex(true);
         this._updatePlaybackInstanceForIndex(false);
-      } else if (status.didJustFinish && !status.isLooping) {
+      } else if (status.didJustFinish && this.index < this.PLAYLIST.length - 1) {
         this._advanceIndex(true);
         this._updatePlaybackInstanceForIndex(true);
       }
@@ -217,12 +211,6 @@ export default class AudioPlayList extends React.Component {
         videoHeight: 0,
       });
     }
-  };
-
-  _onFullscreenUpdate = (event) => {
-    console.log(
-      `FULLSCREEN UPDATE : ${JSON.stringify(event.fullscreenUpdate)}`
-    );
   };
 
   _advanceIndex(forward) {
@@ -307,9 +295,6 @@ export default class AudioPlayList extends React.Component {
       this.state.playbackInstancePosition != null &&
       this.state.playbackInstanceDuration != null
     ) {
-      // return `${this._getMMSSFromMillis(
-      //   this.state.playbackInstancePosition
-      // )} / ${this._getMMSSFromMillis(this.state.playbackInstanceDuration)}`;
       return `${this._getMMSSFromMillis(this.state.playbackInstancePosition)}`;
     }
     return "";
@@ -333,7 +318,6 @@ export default class AudioPlayList extends React.Component {
           onLoadStart={this._onLoadStart}
           onLoad={this._onLoad}
           onError={this._onError}
-          onFullscreenUpdate={this._onFullscreenUpdate}
           onReadyForDisplay={this._onReadyForDisplay}
           useNativeControls={this.state.useNativeControls}
         />

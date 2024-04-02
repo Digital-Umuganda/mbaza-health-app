@@ -4,6 +4,7 @@
 
 import React from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   StyleSheet,
@@ -21,7 +22,6 @@ import {
 } from "expo-av";
 import Slider from "@react-native-community/slider";
 
-import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 
 class Icon {
@@ -73,16 +73,11 @@ export default class AudioPlayList extends React.Component {
     this.state = {
       showVideo: false,
       playbackInstanceName: LOADING_STRING,
-      muted: false,
       playbackInstancePosition: null,
       playbackInstanceDuration: null,
       shouldPlay: true,
       isPlaying: false,
-      isBuffering: false,
       isLoading: true,
-      shouldCorrectPitch: true,
-      volume: 1.0,
-      rate: 1.0,
       videoWidth: DEVICE_WIDTH,
       videoHeight: 0,
       poster: false,
@@ -107,19 +102,12 @@ export default class AudioPlayList extends React.Component {
   async _loadNewPlaybackInstance(playing) {
     if (this.playbackInstance != null) {
       await this.playbackInstance.unloadAsync();
-      // this.playbackInstance.setOnPlaybackStatusUpdate(null);
       this.playbackInstance = null;
     }
 
     const source = { uri: this.PLAYLIST[this.index].uri };
     const initialStatus = {
       shouldPlay: playing,
-      rate: this.state.rate,
-      shouldCorrectPitch: this.state.shouldCorrectPitch,
-      volume: this.state.volume,
-      isMuted: this.state.muted,
-      // // UNCOMMENT THIS TO TEST THE OLD androidImplementation:
-      // androidImplementation: 'MediaPlayer',
     };
 
     const { sound } = await Audio.Sound.createAsync(
@@ -163,11 +151,6 @@ export default class AudioPlayList extends React.Component {
         playbackInstanceDuration: status.durationMillis,
         shouldPlay: status.shouldPlay,
         isPlaying: status.isPlaying,
-        isBuffering: status.isBuffering,
-        rate: status.rate,
-        muted: status.isMuted,
-        volume: status.volume,
-        shouldCorrectPitch: status.shouldCorrectPitch,
       });
       if (status.didJustFinish && this.index === this.PLAYLIST.length - 1) {
         this._advanceIndex(true);
@@ -332,12 +315,9 @@ export default class AudioPlayList extends React.Component {
             style={[
               styles.buttonsContainerBase,
               styles.buttonsContainerTopRow,
-              {
-                opacity: this.state.isLoading ? DISABLED_OPACITY : 1.0,
-              },
             ]}
           >
-            <TouchableHighlight
+            {this.state.isLoading ? (<ActivityIndicator size="small" color="#3D576F" />) : (<TouchableHighlight
               underlayColor={BACKGROUND_COLOR}
               style={styles.wrapper}
               onPress={this._onPlayPausePressed}
@@ -356,7 +336,7 @@ export default class AudioPlayList extends React.Component {
                   color={this.noSlider ? "#3D576F" : "green"}
                 />
               )}
-            </TouchableHighlight>
+            </TouchableHighlight>)}
           </View>
 
           {!this.noSlider ? (
@@ -393,7 +373,7 @@ export default class AudioPlayList extends React.Component {
         </View>
 
         <View />
-      </View>
+      </View >
     );
   }
 }

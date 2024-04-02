@@ -6,7 +6,6 @@ import React from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   TouchableHighlight,

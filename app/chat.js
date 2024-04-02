@@ -23,6 +23,7 @@ import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities/http";
 
 export default function Chat() {
+  const scrollViewRef = useRef();
   const [isRecording, setIsRecording] = useState(false);
   const [recordUrl, setRecordUrl] = useState(null);
   const [lastMessage, setLastMessage] = useState(null);
@@ -44,6 +45,11 @@ export default function Chat() {
       chat(params.message);
     }
   }, [params]);
+
+  useEffect(() => {
+    scrollViewRef.current.scrollToEnd({ animated: true })
+
+  }, [messages])
 
   const fetchMessagesFromChat = async () => {
     if (!params.chatId) {
@@ -80,6 +86,7 @@ export default function Chat() {
             });
           });
         setMessages(messagesCopy);
+
       },
     };
 
@@ -90,7 +97,8 @@ export default function Chat() {
       })
       .catch(function (error) {
         console.log(error);
-      });
+      })
+
   };
 
   useEffect(() => {
@@ -318,7 +326,7 @@ export default function Chat() {
     );
   };
 
-  const scrollViewRef = useRef();
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -446,9 +454,6 @@ export default function Chat() {
       </TouchableOpacity>
       <ScrollView
         ref={scrollViewRef}
-        onContentSizeChange={() =>
-          scrollViewRef.current.scrollToEnd({ animated: true })
-        }
         style={{
           paddingHorizontal: 20,
           marginBottom: 80,

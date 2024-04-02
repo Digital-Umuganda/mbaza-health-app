@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import AudioPlayList from "./app/components/AudioPlayList";
 import { url } from "./utilities";
+import Markdown from 'react-native-markdown-display';
 
 export default function ChatResponse({ content }) {
   const audios = content.audio_responses?.map((item) => `${url}/uploads/${item}`) ?? []
@@ -52,37 +53,14 @@ export default function ChatResponse({ content }) {
         </View>
       </View>
       <View style={{ padding: 15 }}>
-        {/* {audios.length ? (
-          <>
-            <AudioPlayList playlist={audios} />
-            <Text
-              style={{
-                color: "#9BB2C8",
-                fontWeight: "500",
-                lineHeight: 24,
-                marginVertical: 10,
-              }}
-            >
-              Transcript
-            </Text>
-          </>
-        ) : null} */}
-
-        {content?.answer &&
-          content.answer.split("\n").map((item, i) => (
-            <Text
-              selectable={true}
-              style={{
-                color: "#3D576F",
-                fontWeight: "500",
-                lineHeight: 24,
-                marginBottom: 1,
-              }}
-              key={i}
-            >
-              {item}
-            </Text>
-          ))}
+        <Markdown style={{
+          color: "#3D576F",
+          fontWeight: "500",
+          lineHeight: 24,
+          marginBottom: 1,
+        }}>
+          {content?.answer}
+        </Markdown>
       </View>
     </View>
   );

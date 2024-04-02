@@ -19,7 +19,6 @@ import {
   ResizeMode,
   Video,
 } from "expo-av";
-import * as Font from "expo-font";
 import Slider from "@react-native-community/slider";
 
 import { MaterialIcons } from "@expo/vector-icons";
@@ -85,7 +84,6 @@ export default class AudioPlayList extends React.Component {
       isPlaying: false,
       isBuffering: false,
       isLoading: true,
-      fontLoaded: false,
       shouldCorrectPitch: true,
       volume: 1.0,
       rate: 1.0,
@@ -108,13 +106,6 @@ export default class AudioPlayList extends React.Component {
       interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
       playThroughEarpieceAndroid: false,
     });
-    (async () => {
-      await Font.loadAsync({
-        ...MaterialIcons.font,
-        "cutive-mono-regular": require("../../assets/fonts/CutiveMono-Regular.ttf"),
-      });
-      this.setState({ fontLoaded: true });
-    })();
   }
 
   async _loadNewPlaybackInstance(playing) {
@@ -325,9 +316,7 @@ export default class AudioPlayList extends React.Component {
   }
 
   render() {
-    return !this.state.fontLoaded ? (
-      <View style={styles.emptyContainer} />
-    ) : (
+    return (
       <View style={styles.container}>
         <Video
           ref={this._mountVideo}
@@ -392,7 +381,6 @@ export default class AudioPlayList extends React.Component {
                 style={[
                   styles.text,
                   styles.timestamp,
-                  { fontFamily: "cutive-mono-regular" },
                 ]}
               >
                 {this._getTimestamp()}

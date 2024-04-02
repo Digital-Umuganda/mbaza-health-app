@@ -1,15 +1,9 @@
 import { Text, View } from "react-native";
 import AudioPlayList from "./app/components/AudioPlayList";
-import { useMemo } from "react";
 import { url } from "./utilities";
 
 export default function ChatResponse({ content }) {
-  const audios = useMemo(() => {
-    if (!content?.audio_responses?.length) {
-      return [];
-    }
-    return content.audio_responses.map((item) => `${url}/uploads/${item}`);
-  }, [content]);
+  const audios = content.audio_responses?.map((item) => `${url}/uploads/${item}`) ?? []
 
   return (
     <View

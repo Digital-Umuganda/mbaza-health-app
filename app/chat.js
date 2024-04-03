@@ -21,6 +21,7 @@ import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities/http";
+import SkeletonLoader from "./components/SkeletonLoader";
 
 export default function Chat() {
   const scrollViewRef = useRef();
@@ -49,7 +50,7 @@ export default function Chat() {
   useEffect(() => {
     scrollViewRef.current.scrollToEnd({ animated: true })
 
-  }, [messages])
+  }, [messages, translating])
 
   const fetchMessagesFromChat = async () => {
     if (!params.chatId) {
@@ -244,6 +245,7 @@ export default function Chat() {
         if (done) {
           if (responseText.chat_id && !chatId) {
             setChatId(responseText.chat_id);
+            setTranslating(false);
           }
           if (responseText.answer) {
             setMessages((prev) => {
@@ -314,7 +316,7 @@ export default function Chat() {
     if (message.type == "request") {
       return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
-      return <ChatResponse key={index} content={message.message} />;
+      return <ChatResponse key={index} content={message.message} isLoading={translating} />;
     }
   };
 
@@ -463,6 +465,7 @@ export default function Chat() {
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}
+        {translating && <SkeletonLoader />}
       </ScrollView>
       <View
         // onPress={() => router.push("/help")}
@@ -520,6 +523,7 @@ export default function Chat() {
                 placeholder="Enter message"
                 placeholderTextColor="white"
                 multiline
+                editable={isRecording || translating ? false : true}
               />
             </>
           )}

@@ -2,9 +2,26 @@ import { Text, View } from "react-native";
 import AudioPlayList from "./app/components/AudioPlayList";
 import { url } from "./utilities";
 import Markdown from 'react-native-markdown-display';
+import { useEffect, useState } from "react";
+import { downloadAndCacheAudio } from "./utilities/helpers";
 
 export default function ChatResponse({ content }) {
-  const audios = content.audio_responses?.map((item) => `${url}/uploads/${item}`) ?? []
+  const [audioResponses, setAudioResponses] = useState([]);
+
+  const downloadAudios = async () => {
+    const audioFiles = await Promise.all(
+      content.audio_responses.map(async (item) => {
+        return await downloadAndCacheAudio(`${url}/uploads/${item}`);
+      })
+    );
+    setAudioResponses(audioFiles.filter((item) => item !== null));
+  }
+
+  useEffect(() => {
+    if (content.audio_responses?.length) {
+      downloadAudios();
+    }
+  }, [content.audio_responses])
 
   return (
     <View
@@ -49,7 +66,7 @@ export default function ChatResponse({ content }) {
               content?.created_at.includes(":") &&
               content.created_at.split(":", 2).join(":")}
           </Text>
-          {audios?.length ? <AudioPlayList playlist={audios} noSlider /> : null}
+          {audioResponses.length ? <AudioPlayList playlist={audioResponses} noSlider /> : null}
         </View>
       </View>
       <View style={{ padding: 15 }}>

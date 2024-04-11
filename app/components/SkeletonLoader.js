@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
 
-const SkeletonLoader = () => {
+const SkeletonLoader = ({ marginBottom = 64 }) => {
     const [animationFirstLine] = useState(new Animated.Value(0));
     const [animationSecondLine] = useState(new Animated.Value(0));
 
@@ -59,7 +59,7 @@ const SkeletonLoader = () => {
             <Animated.View
                 style={[
                     styles.skeletonLine,
-                    { width: '70%', marginTop: 8, marginBottom: 64, opacity: opacitySecondLine, transform: [{ translateX: translateXSecondLine }] },
+                    { width: '70%', marginTop: 8, marginBottom, opacity: opacitySecondLine, transform: [{ translateX: translateXSecondLine }] },
                 ]}
             />
         </View>

@@ -91,6 +91,7 @@ export default function Chat() {
       },
     };
 
+    setTranslating(true);
     await instance(config)
       .then(function (response) {
         // console.log({ data: response.data });
@@ -98,7 +99,9 @@ export default function Chat() {
       })
       .catch(function (error) {
         console.log(error);
-      })
+      }).finally(() => {
+        setTranslating(false);
+      });
 
   };
 
@@ -316,7 +319,7 @@ export default function Chat() {
     if (message.type == "request") {
       return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
-      return <ChatResponse key={index} content={message.message} isLoading={translating} />;
+      return <ChatResponse key={index} content={message.message} isTranslating={translating} />;
     }
   };
 

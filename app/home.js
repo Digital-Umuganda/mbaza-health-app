@@ -4,21 +4,25 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { fetchProfile } from "../utilities";
 import { useCallback, useEffect, useState } from "react";
 import instance from "../utilities/http";
+import SkeletonLoader from "./components/SkeletonLoader";
+
+const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
   const navigation = useNavigation();
 
   const fetchChats = async () => {
     try {
+      setIsLoading(true);
       const response = await instance.get(
         "/api/v1/chats?sort_field=created_at&sort_order=desc"
       );
+      setIsLoading(false);
 
-      let data = response.data;
-
-      setChats(data);
-    } catch (error) {}
+      setChats(response.data);
+    } catch (error) { }
   };
 
   const setTheAppUp = useCallback(() => {
@@ -206,6 +210,7 @@ export default function Home() {
             </Text>
           </View>
           {rendeChats()}
+          {isLoading && arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />)}
         </View>
       </ScrollView>
       <TouchableOpacity

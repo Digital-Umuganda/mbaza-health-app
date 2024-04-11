@@ -17,12 +17,7 @@ export default function ChatResponse({ content, isTranslating }) {
       })
     )).filter((item) => item !== null);
     setIsLoading(false);
-    if (audioFiles.length) {
-      setAudioResponses(prev => {
-        const audioSet = new Set([...prev, ...audioFiles]);
-        return Array.from(audioSet);
-      })
-    }
+    setAudioResponses(audioFiles);
   }
 
   useEffect(() => {

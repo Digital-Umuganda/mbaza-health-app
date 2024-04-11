@@ -209,8 +209,9 @@ export default function Home() {
               IBYO MUHERUKA KUBAZA
             </Text>
           </View>
-          {rendeChats()}
-          {isLoading && arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />)}
+          {isLoading ? arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />) :
+            chats.length ? rendeChats() : <Text style={{ marginTop: 20, color: "#3D576F", paddingHorizontal: 20 }}>Nta biganiro byabonetse</Text>
+          }
         </View>
       </ScrollView>
       <TouchableOpacity

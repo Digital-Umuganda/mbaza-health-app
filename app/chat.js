@@ -319,7 +319,8 @@ export default function Chat() {
     if (message.type == "request") {
       return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
-      return <ChatResponse key={index} content={message.message} isTranslating={translating} />;
+      return <ChatResponse key={index} content={message.message}
+        isTranslating={translating && !message.message?.audio_responses?.length} />
     }
   };
 

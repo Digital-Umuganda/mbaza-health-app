@@ -9,6 +9,8 @@ export default function ChatResponse({ content, isTranslating }) {
   const [audioResponses, setAudioResponses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const audioUrls = content.audio_responses?.map((item) => `${url}/uploads/${item}`);
+
   const downloadAudios = async () => {
     setIsLoading(true);
     const audioFiles = (await Promise.all(
@@ -20,11 +22,11 @@ export default function ChatResponse({ content, isTranslating }) {
     setAudioResponses(audioFiles);
   }
 
-  useEffect(() => {
-    if (content.audio_responses?.length) {
-      downloadAudios();
-    }
-  }, [content.audio_responses])
+  // useEffect(() => {
+  //   if (content.audio_responses?.length) {
+  //     downloadAudios();
+  //   }
+  // }, [content.audio_responses])
 
 
   return (
@@ -71,8 +73,8 @@ export default function ChatResponse({ content, isTranslating }) {
               content.created_at.split(":", 2).join(":")}
           </Text>
           {isTranslating || isLoading ? <ActivityIndicator size="small" color="#3D576F" />
-            : audioResponses.length ?
-              <AudioPlayList playlist={audioResponses} noSlider /> : null}
+            : audioUrls?.length ?
+              <AudioPlayList playlist={audioUrls} noSlider /> : null}
         </View>
       </View>
       <View style={{ padding: 15 }}>

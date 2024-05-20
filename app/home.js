@@ -1,45 +1,41 @@
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { fetchProfile } from "../utilities";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import instance from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
+import { Ionicons } from "@expo/vector-icons";
 
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
 export default function Home() {
+  const [perPage, setPerPage] = useState(5);
+  const [showRecentChats, setShowRecentChats] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
-  const navigation = useNavigation();
 
-  const fetchChats = async () => {
+  const fetchChats = async (additions = 0) => {
+    const _perPage = perPage + additions;
+
     try {
       setIsLoading(true);
       const response = await instance.get(
-        "/api/v1/chats?sort_field=created_at&sort_order=desc"
+        `/api/v1/chats?sort_field=created_at&sort_order=desc&limit=${_perPage}`
       );
-      setIsLoading(false);
 
       setChats(response.data);
+
+      setPerPage(_perPage);
     } catch (error) { }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   const setTheAppUp = useCallback(() => {
     Promise.allSettled(fetchChats(), fetchProfile());
   }, []);
-
-  useEffect(() => {
-    setTheAppUp();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      setTheAppUp();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
 
   const Chat = ({ chat }) => {
     return (
@@ -194,24 +190,86 @@ export default function Home() {
           </TouchableOpacity>
         </View>
         <View style={{ marginTop: 20 }}>
-          <View
-            style={{
-              backgroundColor: "#478CCA3D",
-              borderTopRightRadius: 8,
-              borderTopLeftRadius: 8,
-              height: 67,
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{ color: "#478CCA", fontWeight: "600", paddingLeft: 20 }}
-            >
-              IBYO MUHERUKA KUBAZA
-            </Text>
-          </View>
-          {isLoading ? arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />) :
-            chats.length ? rendeChats() : <Text style={{ marginTop: 20, color: "#3D576F", paddingHorizontal: 20 }}>Nta biganiro byabonetse</Text>
+          <TouchableOpacity onPress={
+            () => {
+              if (!showRecentChats) {
+                setTheAppUp()
+              }
+              setShowRecentChats(!showRecentChats)
+            }
           }
+          >
+            <View
+              style={{
+                backgroundColor: "#478CCA3D",
+                borderTopRightRadius: 8,
+                borderTopLeftRadius: 8,
+                height: 67,
+                justifyContent: "space-between",
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "row",
+                ...(showRecentChats ? {
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 0
+                } : { borderBottomLeftRadius: 8, borderBottomRightRadius: 8 }),
+              }}
+            >
+
+              <Text
+                style={{ color: "#478CCA", fontWeight: "600", paddingHorizontal: 20 }}
+              >
+                IBYO MUHERUKA KUBAZA
+              </Text>
+
+              {/* Show chevron depending on showRecents */}
+              {
+                showRecentChats ? <Ionicons name="chevron-down" size={24} color="#478CCA" style={{
+                  marginRight: 20,
+                }} /> : <Ionicons name="chevron-up" size={24} color="#478CCA" style={{
+                  marginRight: 20,
+                  transform: [{ rotate: "90deg" }]
+                }} />
+              }
+
+            </View>
+          </TouchableOpacity>
+
+          <View style={{
+            display: showRecentChats ? "flex" : "none",
+          }}>
+            {isLoading && (!chats.length) ? arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />) : chats.length ? rendeChats() : <Text style={{ marginTop: 20, color: "#3D576F", paddingHorizontal: 20 }}>Nta biganiro byabonetse</Text>}
+
+            {/* Load more if chat length divisible  5 as size per page */}
+            {chats.length % 5 === 0 && chats.length ? <TouchableOpacity
+              onPress={() => fetchChats(5)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}
+            >
+              <View style={{
+                backgroundColor: isLoading ? "#B1C6DA" : '#478CCA',
+                paddingHorizontal: 32,
+                borderRadius: 8,
+                paddingVertical: 10,
+                marginTop: 32,
+                opacity: isLoading ? 0.6 : 0.8
+              }}>
+                <Text
+                  style={{
+                    color: "white",
+                    textAlign: "center",
+                    fontWeight: "normal",
+                    fontSize: 18,
+                  }}
+                >
+                  Ibindi biganiro{isLoading ? "..." : ""}
+                </Text></View>
+            </TouchableOpacity> : null}
+          </View>
+
         </View>
       </ScrollView>
       <TouchableOpacity

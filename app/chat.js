@@ -107,7 +107,7 @@ export default function Chat() {
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      if (params.hasFeedback === "false" && chatId) {
+      if ((params.hasFeedback === "false") && chatId) {
         e.preventDefault();
         setModalVisible(true);
 
@@ -127,11 +127,13 @@ export default function Chat() {
   const snapPoints = useMemo(() => ["25%", "50%", "100%"], []);
 
   // callbacks
-  const handleSheetChanges = () =>
-    router.replace({
+  const handleSheetChanges = () => {
+    params.hasFeedback = "true";
+    router.push({
       pathname: "/custom-chat",
       params: { chatId },
     });
+  }
 
   const sendFeedback = async (is_satisfied) => {
     if (!chatId || isLoading) {
@@ -350,6 +352,7 @@ export default function Chat() {
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
+
           }}
         >
           <View
@@ -358,10 +361,25 @@ export default function Chat() {
               padding: 20,
               borderRadius: 10,
               maxWidth: "70%",
+              position: 'relative'
             }}
           >
+            <TouchableOpacity
+              onPress={() => {
+                params.hasFeedback = "true";
+                router.replace('/home')
+              }}
+              style={{
+                position: 'absolute',
+                top: 5,
+                right: 5,
+                paddingHorizontal: 10
+              }}
+            >
+              <Ionicons name="close" size={24} color="black" />
+            </TouchableOpacity>
             <Text
-              style={{ fontSize: 24, textAlign: "center", color: "#3D576F" }}
+              style={{ fontSize: 24, textAlign: "center", color: "#3D576F", marginTop: 8 }}
             >
               Ese mwanyuzwe nibisubizo mwahawe?
             </Text>
@@ -428,7 +446,7 @@ export default function Chat() {
         </View>
       </Modal>
       <TouchableOpacity
-        onPress={() => handleSheetChanges(2)}
+        onPress={handleSheetChanges}
         style={{
           width: "100%",
           backgroundColor: "#FFFFFF",

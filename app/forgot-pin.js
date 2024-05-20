@@ -153,7 +153,7 @@ const ForgotPinScreen = () => {
             backgroundColor="transparent"
             textColor="#3D576F"
             underlineText={true}
-            onPress={router.back}
+            onPress={() => router.replace('/login')}
           />
         </View>
       </View>

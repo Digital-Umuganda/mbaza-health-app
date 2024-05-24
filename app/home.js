@@ -1,8 +1,8 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { fetchProfile } from "../utilities";
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import instance from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,10 +10,12 @@ import { Ionicons } from "@expo/vector-icons";
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
 export default function Home() {
+  const params = useLocalSearchParams();
   const [perPage, setPerPage] = useState(5);
   const [showRecentChats, setShowRecentChats] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
+
 
   const fetchChats = async (additions = 0) => {
     const _perPage = perPage + additions;
@@ -33,9 +35,14 @@ export default function Home() {
     }
   };
 
-  const setTheAppUp = useCallback(() => {
-    Promise.allSettled(fetchChats(), fetchProfile());
-  }, []);
+  useEffect(() => {
+    fetchProfile()
+    if (params?.showRecentChats === "true") {
+      setShowRecentChats(true);
+      fetchChats();
+    }
+  }, [])
+
 
   const Chat = ({ chat }) => {
     return (
@@ -43,7 +50,10 @@ export default function Home() {
         onPress={() =>
           router.push({
             pathname: "/chat",
-            params: { chatId: chat.id, hasFeedback: !!chat.feedback },
+            params: {
+              chatId: chat.id, hasFeedback: !!chat.feedback,
+              showRecentChats
+            },
           })
         }
         style={{
@@ -82,7 +92,7 @@ export default function Home() {
             />
           )}
           <Text style={{ color: "#3D576F8E", fontSize: 12 }}>
-            {chat.created_at.split("T")[0]}
+            {chat.created_at.split("T")[0]} {chat.created_at.split("T")[1].split(".")[0]}
           </Text>
         </View>
       </TouchableOpacity>
@@ -193,7 +203,7 @@ export default function Home() {
           <TouchableOpacity onPress={
             () => {
               if (!showRecentChats) {
-                setTheAppUp()
+                fetchChats()
               }
               setShowRecentChats(!showRecentChats)
             }
@@ -276,7 +286,10 @@ export default function Home() {
         onPress={() => {
           router.push({
             pathname: "/chat",
-            params: { hasFeedback: false },
+            params: {
+              hasFeedback: false,
+              showRecentChats
+            },
           });
         }}
         style={{

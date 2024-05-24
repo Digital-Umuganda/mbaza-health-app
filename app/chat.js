@@ -170,8 +170,9 @@ export default function Chat() {
 
     let data = {
       kinyarwanda_question: message,
-      requested_at: new Date().toISOString(),
+      // requested_at: new Date().toISOString(),
       with_audio: true,
+      with_english: true
     };
 
     if (currentChatId) {
@@ -222,7 +223,7 @@ export default function Chat() {
     try {
       let endpoint = isAudio ? `/chatbot-audio` : "/kiny/chatbot";
 
-      endpoint += `?requested_at=${new Date().toISOString()}`;
+      // endpoint += `?requested_at=${new Date().toISOString()}`;
 
       if (currentChatId) {
         endpoint += `&chat_id=${currentChatId}`;
@@ -367,7 +368,12 @@ export default function Chat() {
             <TouchableOpacity
               onPress={() => {
                 params.hasFeedback = "true";
-                router.replace('/home')
+                router.replace({
+                  pathname: '/home',
+                  params: {
+                    showRecentChats: params.showRecentChats
+                  }
+                })
               }}
               style={{
                 position: 'absolute',

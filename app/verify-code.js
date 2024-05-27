@@ -71,6 +71,34 @@ const VerifyCodeScreen = () => {
       setIsLoading(false);
     }
   };
+
+  const handleResendCode = async () => {
+    if (isLoading) return;
+    try {
+      setIsLoading(true);
+      await axios.post(
+        `${url}/api/v1/auth/send-code/${params.phoneNumber}?field=phone`
+      );
+      Toast.show({
+        type: "success",
+        text1: "PIN Wibagiwe",
+        text2: "Kode yoherejwe kuri telefoni yawe.",
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message;
+      Toast.show({
+        type: "error",
+        text1: "PIN Wibagiwe",
+        text2: message,
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
   return (
     <>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -171,6 +199,19 @@ const VerifyCodeScreen = () => {
             <Text style={{ color: "white", textAlign: "center" }}>Emeza</Text>
           )}
         </TouchableOpacity>
+
+        <View
+          style={{ marginTop: 32 }}
+
+        >
+          <Button
+            title="Ntabwo wabonye kode?"
+            backgroundColor="transparent"
+            textColor="#478CCA"
+            underlineText={true}
+            onPress={handleResendCode}
+          />
+        </View>
 
         <View style={{ marginTop: 64 }}>
           <Button

@@ -18,7 +18,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18
                 },
-                headerTitle: "RBC | BAZA"
+                headerTitle: "RBC | MBAZA"
             }} />
             <Stack.Screen name='help-detail' options={{
                 headerStyle: {
@@ -30,7 +30,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18
                 },
-                headerTitle: "RBC | BAZA"
+                headerTitle: "RBC | MBAZA"
             }} />
             <Stack.Screen name='home' options={{
                 headerStyle: {
@@ -42,7 +42,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18,
                 },
-                headerTitle: "RBC | BAZA",
+                headerTitle: "RBC | MBAZA",
                 headerBackVisible: false
             }} />
             <Stack.Screen name='chat' options={{
@@ -55,7 +55,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18,
                 },
-                headerTitle: "RBC | BAZA"
+                headerTitle: "RBC | MBAZA"
             }} />
             <Stack.Screen name='verify' options={{ headerShown: false }} />
             <Stack.Screen name='settings' options={{
@@ -80,7 +80,7 @@ export default function Layout() {
                     color: 'white',
                     fontSize: 18,
                 },
-                headerTitle: "RBC | BAZA"
+                headerTitle: "RBC | MBAZA"
             }} />
         </Stack>
     );

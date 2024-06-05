@@ -22,6 +22,7 @@ import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
+import appDayjs from "./utils/date";
 
 export default function Chat() {
   const scrollViewRef = useRef();
@@ -80,7 +81,7 @@ export default function Chat() {
             messagesCopy.push({
               message: {
                 answer: chat.kinyarwanda_response,
-                created_at: chat.created_at.split("T").join(" "),
+                created_at: chat.created_at,
                 audio_responses: chat.audio_responses,
               },
               type: "response",
@@ -170,7 +171,7 @@ export default function Chat() {
 
     let data = {
       kinyarwanda_question: message,
-      // requested_at: new Date().toISOString(),
+      requested_at: appDayjs().toDate(),
       with_audio: true,
       with_english: true
     };
@@ -184,7 +185,7 @@ export default function Chat() {
       {
         message: {
           answer: message,
-          requested_at: new Date(),
+          requested_at: appDayjs().toDate().toUTCString(),
           audio_question,
         },
         type: "request",

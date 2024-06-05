@@ -2,24 +2,9 @@ import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { url } from "./utilities";
 import AudioPlayList from "./app/components/AudioPlayList";
+import appDayjs, { dateTimeWithSpaceFormat } from "./app/utils/date";
 
 export default function ChatRequest({ content }) {
-  let date;
-  let time;
-  if (
-    content.requested_at != null &&
-    typeof content.requested_at == "string" &&
-    content.requested_at.includes("T")
-  ) {
-    date = content.requested_at.split("T")[0];
-    time = content.requested_at.split("T")[1].split(".")[0];
-  } else {
-    date = new Date();
-    time = date.toLocaleTimeString();
-    time = time.split(" ")[0];
-    date = date.toLocaleDateString();
-  }
-
   const audio = useMemo(() => {
     const audioUrl = content?.audio_question;
     if (!audioUrl) {
@@ -58,7 +43,7 @@ export default function ChatRequest({ content }) {
         </View>
         <View style={{ flexDirection: "row" }}>
           <Text style={{ color: "#3D576F8E" }}>
-            {date} {time}
+            {(content.requested_at ? appDayjs(content.requested_at) : appDayjs()).format(dateTimeWithSpaceFormat)}
           </Text>
         </View>
       </View>

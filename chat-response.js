@@ -4,6 +4,7 @@ import { url } from "./utilities";
 import Markdown from 'react-native-markdown-display';
 import { useEffect, useState } from "react";
 import { downloadAndCacheAudio } from "./utilities/helpers";
+import appDayjs, { dateTimeWithSpaceFormat } from "./app/utils/date";
 
 export default function ChatResponse({ content, isTranslating }) {
   const [audioResponses, setAudioResponses] = useState([]);
@@ -67,10 +68,8 @@ export default function ChatResponse({ content, isTranslating }) {
           }}
         >
           <Text style={{ color: "#3D576F8E", marginRight: 32 }}>
-            {content != null &&
-              content?.created_at !== undefined &&
-              content?.created_at.includes(":") &&
-              content.created_at.split(":", 2).join(":")}
+            {!!content &&
+              !!content?.created_at && appDayjs(content.created_at).format(dateTimeWithSpaceFormat)}
           </Text>
           {isTranslating || isLoading ? <ActivityIndicator size="small" color="#3D576F" />
             : audioUrls?.length ?

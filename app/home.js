@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import instance from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
+import appDayjs, { dateTimeWithSpaceFormat } from './utils/date'
 
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
@@ -92,14 +93,14 @@ export default function Home() {
             />
           )}
           <Text style={{ color: "#3D576F8E", fontSize: 12 }}>
-            {chat.created_at.split("T")[0]} {chat.created_at.split("T")[1].split(".")[0]}
+            {appDayjs(chat.created_at).format(dateTimeWithSpaceFormat)}
           </Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  const rendeChats = () => {
+  const renderChats = () => {
     return (
       Array.isArray(chats) &&
       chats.map((chat, index) => <Chat chat={chat} key={index} />)
@@ -248,7 +249,7 @@ export default function Home() {
           <View style={{
             display: showRecentChats ? "flex" : "none",
           }}>
-            {isLoading && (!chats.length) ? arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />) : chats.length ? rendeChats() : <Text style={{ marginTop: 20, color: "#3D576F", paddingHorizontal: 20 }}>Nta biganiro byabonetse</Text>}
+            {isLoading && (!chats.length) ? arr5.map((i) => <SkeletonLoader key={i} marginBottom={8} />) : chats.length ? renderChats() : <Text style={{ marginTop: 20, color: "#3D576F", paddingHorizontal: 20 }}>Nta biganiro byabonetse</Text>}
 
             {/* Load more if chat length divisible  5 as size per page */}
             {chats.length % 5 === 0 && chats.length ? <TouchableOpacity

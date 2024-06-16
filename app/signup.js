@@ -51,7 +51,7 @@ export default function Signup() {
     axios
       .post(`${url}/api/v1/auth/signup`, data)
       .then(function (response) {
-        sendVerificationCode();
+        storeData("phone_number", data.phone_number).then(() => router.push("/verify"));
       })
       .catch(function (error) {
         const message = error?.response?.data?.message || error?.message;
@@ -65,29 +65,6 @@ export default function Signup() {
       .finally(() => {
         setIsLoading(false);
       });
-  };
-
-  const sendVerificationCode = () => {
-    let phone = phoneNumber;
-    if (phone.startsWith("0")) {
-      phone = `25${phone}`;
-    } else if (phone.startsWith("7")) {
-      phone = `250${phone}`;
-    }
-
-    const config = {
-      method: "post",
-      url: `${url}/api/v1/auth/send-code/${phone}`,
-      params: {
-        field: "phone",
-      },
-    };
-
-    axios(config)
-      .then(function (response) {
-        storeData("phone_number", phone).then(() => router.push("/verify"));
-      })
-      .catch(function (error) { });
   };
 
   const validate = () => {

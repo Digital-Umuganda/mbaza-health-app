@@ -41,11 +41,8 @@ export default function Chat() {
   useEffect(() => {
     if (params?.chatId) {
       setChatId(params.chatId);
-      fetchMessagesFromChat();
     }
-    if (params.message) {
-      chat(params.message);
-    }
+    fetchMessagesFromChat();
   }, [params]);
 
   useEffect(() => {
@@ -55,6 +52,9 @@ export default function Chat() {
 
   const fetchMessagesFromChat = async () => {
     if (!params.chatId) {
+      if (params?.message) {
+        chat(params.message);
+      }
       return;
     }
     const config = {
@@ -102,6 +102,9 @@ export default function Chat() {
         console.log(error);
       }).finally(() => {
         setTranslating(false);
+        if (params?.message) {
+          chat(params.message);
+        }
       });
 
   };

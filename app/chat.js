@@ -224,10 +224,8 @@ export default function Chat() {
     try {
       let endpoint = isAudio ? `/chatbot-audio` : "/kiny/chatbot";
 
-      // endpoint += `?requested_at=${new Date().toISOString()}`;
-
       if (currentChatId) {
-        endpoint += `&chat_id=${currentChatId}`;
+        endpoint += `?chat_id=${currentChatId}`;
       }
 
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);

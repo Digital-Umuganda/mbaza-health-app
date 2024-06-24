@@ -41,11 +41,8 @@ export default function Chat() {
   useEffect(() => {
     if (params?.chatId) {
       setChatId(params.chatId);
-      fetchMessagesFromChat();
     }
-    if (params.message) {
-      chat(params.message);
-    }
+    fetchMessagesFromChat();
   }, [params]);
 
   useEffect(() => {
@@ -55,6 +52,9 @@ export default function Chat() {
 
   const fetchMessagesFromChat = async () => {
     if (!params.chatId) {
+      if (params?.message) {
+        chat(params.message);
+      }
       return;
     }
     const config = {
@@ -102,6 +102,9 @@ export default function Chat() {
         console.log(error);
       }).finally(() => {
         setTranslating(false);
+        if (params?.message) {
+          chat(params.message);
+        }
       });
 
   };
@@ -224,10 +227,8 @@ export default function Chat() {
     try {
       let endpoint = isAudio ? `/chatbot-audio` : "/kiny/chatbot";
 
-      // endpoint += `?requested_at=${new Date().toISOString()}`;
-
       if (currentChatId) {
-        endpoint += `&chat_id=${currentChatId}`;
+        endpoint += `?chat_id=${currentChatId}`;
       }
 
       const response = await fetch(`${url}/api/v1${endpoint}`, requestOptions);

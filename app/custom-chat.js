@@ -11,7 +11,7 @@ import SelectDropdown from "react-native-select-dropdown";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Path, Svg } from "react-native-svg";
 
-export default function Signup() {
+export default function CustomChat() {
   const [sex, setSex] = useState();
   const [age, setAge] = useState();
   const [weight, setWeight] = useState();
@@ -19,95 +19,73 @@ export default function Signup() {
   const [disease, setDisease] = useState();
   const [question, setQuestion] = useState();
   const [errorBag, setErrorBag] = useState({});
-  const [loading, setLoading] = useState(false);
   const params = useLocalSearchParams();
 
-  const signUp = async () => {
-    if (loading) {
+  const isValid = () => {
+    const errors = {};
+    if (!sex?.length) {
+      errors.sex = "Hitamo igitsina";
+    }
+    if (!age?.length) {
+      errors.age = "Andika imyaka y'umurwayi";
+    }
+    if (!weight?.length) {
+      errors.weight = "Andika ibiro by'umurwayi";
+    } else if (isNaN(weight)) {
+      errors.weight = "Ibiro by'umurwayi birimo amakosa";
+    }
+    if (!height?.length) {
+      errors.height = "Andika uburebure bw'umurwayi";
+    } else if (isNaN(height)) {
+      errors.height = "Uburebure bw'umurwayi birimo amakosa";
+    }
+    if (!disease?.length) {
+      errors.disease = "Hitamo indwara y'umurwayi";
+    }
+
+    if (!question?.length) {
+      errors.question = "Andika ikibazo cyawe hano";
+    }
+
+    setErrorBag(errors);
+    return Object.keys(errors).length === 0
+  }
+
+  const askQuestion = async () => {
+    if (!isValid()) {
       return;
     }
 
-    try {
-      setLoading(true);
-      let bag = validate();
+    let message = `Hakurikijwe ibi bikurikira:\n\n1. Ubwoko bw'indwara: ${disease}\n`;
 
-      if (bag.disease == true || bag.question == true) {
-        setErrorBag(bag);
-        setLoading(false);
-        return;
+    if (height != null || weight != null || age != null || sex != null) {
+      message += `2. Amakuru y'umurwayi: \n`;
+
+      if (height != null) {
+        message += `\t- Uburebure: ${height} cm\n`;
       }
 
-      setErrorBag({});
-
-      let message = `Hakurikijwe ibi bikurikira:\n\n1. Ubwoko bw'indwara: ${disease}\n`;
-
-      if (height != null || weight != null || age != null || sex != null) {
-        message += `2. Amakuru y'umurwayi: \n`;
-
-        if (height != null) {
-          message += `\t- Uburebure: ${height} cm\n`;
-        }
-
-        if (weight != null) {
-          message += `\t- ibiro: ${weight} kg\n`;
-        }
-
-        if (age != null) {
-          message += `\t- Imyaka: ${age}\n`;
-        }
-
-        if (sex != null) {
-          message += `\t- Igitsina: ${sex}\n`;
-        }
+      if (weight != null) {
+        message += `\t- ibiro: ${weight} kg\n`;
       }
 
-      message += `\nUkurikije amakuru yatanzwe, nyabuneka subiza ikibazo cyatanzwe: ${question}`;
+      if (age != null) {
+        message += `\t- Imyaka: ${age}\n`;
+      }
 
-      router.replace({
-        pathname: "/chat",
-        params: { chatId: params.chatId, message },
-      });
-    } catch (error) {
-      setLoading(false);
+      if (sex != null) {
+        message += `\t- Igitsina: ${sex}\n`;
+      }
     }
+
+    message += `\nUkurikije amakuru yatanzwe, nyabuneka subiza ikibazo cyatanzwe: ${question}`;
+
+    router.replace({
+      pathname: "/chat",
+      params: { chatId: params.chatId, message },
+    });
   };
 
-  function countOccurrences(str, char) {
-    let count = 0;
-    for (let i = 0; i < str.length; i++) {
-      if (str.charAt(i) === char) {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  const validate = () => {
-    const data = {
-      disease,
-      question,
-    };
-
-    let bag = {};
-
-    if (
-      data?.disease == null ||
-      typeof data.disease != "string" ||
-      data.question?.length < 1
-    ) {
-      bag.disease = true;
-    }
-
-    if (
-      data?.question == null ||
-      typeof data.question != "string" ||
-      data.question.length < 1
-    ) {
-      bag.question = true;
-    }
-
-    return bag;
-  };
 
   return (
     <KeyboardAwareScrollView>
@@ -151,7 +129,7 @@ export default function Signup() {
                 borderRadius: 8,
                 borderColor: "#478CCA3D",
                 paddingVertical: 4,
-                paddingHorizontal: 15,
+                paddingHorizontal: 4,
                 alignItems: "center",
               }}
             >
@@ -165,6 +143,9 @@ export default function Signup() {
                 buttonTextStyle={{ color: "#3D576F", textAlign: "left" }}
               />
             </View>
+            {errorBag.sex && (
+              <Text style={{ color: "red" }}>{errorBag.sex}</Text>
+            )}
           </View>
           <View style={{ flex: 1 }}>
             <View
@@ -174,7 +155,7 @@ export default function Signup() {
                 borderWidth: 1,
                 borderRadius: 8,
                 borderColor: "#478CCA3D",
-                paddingHorizontal: 15,
+                paddingHorizontal: 4,
                 alignItems: "center",
               }}
             >
@@ -191,6 +172,9 @@ export default function Signup() {
                 keyboardType="numeric"
               />
             </View>
+            {errorBag.age && (
+              <Text style={{ color: "red" }}>{errorBag.age}</Text>
+            )}
           </View>
         </View>
         <View
@@ -210,7 +194,7 @@ export default function Signup() {
                 borderWidth: 1,
                 borderRadius: 8,
                 borderColor: "#478CCA3D",
-                paddingHorizontal: 15,
+                paddingHorizontal: 4,
                 alignItems: "center",
               }}
             >
@@ -227,6 +211,9 @@ export default function Signup() {
                 onChangeText={(text) => setWeight(text)}
               />
             </View>
+            {errorBag.weight && (
+              <Text style={{ color: "red" }}>{errorBag.weight}</Text>
+            )}
           </View>
           <View style={{ flex: 1 }}>
             <View
@@ -236,12 +223,12 @@ export default function Signup() {
                 borderWidth: 1,
                 borderRadius: 8,
                 borderColor: "#478CCA3D",
-                paddingHorizontal: 15,
+                paddingHorizontal: 4,
                 alignItems: "center",
               }}
             >
               <TextInput
-                placeholder="Uburebure"
+                placeholder="Uburebure(cm)"
                 placeholderTextColor="#3D576F8E"
                 style={{
                   fontSize: 14,
@@ -253,6 +240,9 @@ export default function Signup() {
                 onChangeText={(text) => setHeight(text)}
               />
             </View>
+            {errorBag.height && (
+              <Text style={{ color: "red" }}>{errorBag.height}</Text>
+            )}
           </View>
         </View>
         <View style={{ width: "100%", marginBottom: 20 }}>
@@ -264,7 +254,7 @@ export default function Signup() {
               borderRadius: 8,
               borderColor: "#478CCA3D",
               paddingVertical: 4,
-              paddingHorizontal: 15,
+              paddingHorizontal: 4,
               alignItems: "center",
             }}
           >
@@ -283,8 +273,8 @@ export default function Signup() {
               buttonTextStyle={{ color: "#3D576F", textAlign: "left" }}
             />
           </View>
-          {errorBag.disease == true && (
-            <Text style={{ color: "red" }}>Hitamo indwara</Text>
+          {errorBag.disease && (
+            <Text style={{ color: "red" }}>{errorBag.disease}</Text>
           )}
         </View>
         <View style={{ marginBottom: 20, width: "100%" }}>
@@ -293,7 +283,7 @@ export default function Signup() {
               borderWidth: 1,
               borderRadius: 8,
               borderColor: "#478CCA3D",
-              paddingHorizontal: 15,
+              paddingHorizontal: 4,
             }}
           >
             <TextInput
@@ -306,16 +296,15 @@ export default function Signup() {
               value={question}
             />
           </View>
-          {errorBag.question == true && (
-            <Text style={{ color: "red" }}>Uzuzamo ikibazo cyawe hano.</Text>
+          {errorBag.question && (
+            <Text style={{ color: "red" }}>{errorBag.question}</Text>
           )}
         </View>
         <Button
-          onPress={() => signUp()}
+          onPress={askQuestion}
           title="OHEREZA"
           backgroundColor="#478CCA"
           textColor="white"
-          loading={loading}
         >
           <Svg
             fill="none"

@@ -1,10 +1,9 @@
-import { Image, ImageBackground, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { getData } from "../utilities";
 import { useEffect } from "react";
-import { Text } from "react-native-svg";
 
 const checkSession = async () => {
   const accessToken = await getData("access_token");

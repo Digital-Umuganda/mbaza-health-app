@@ -7,6 +7,7 @@ import instance from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
 import appDayjs, { dateTimeWithSpaceFormat } from './utils/date'
+import ContentBackground from "./components/ContentBackground";
 
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
@@ -107,7 +108,7 @@ export default function Home() {
     );
   };
   return (
-    <View style={{ flex: 1 }}>
+    <ContentBackground>
       <ScrollView style={{ paddingHorizontal: 20, marginBottom: 80 }}>
         <View
           style={{
@@ -322,6 +323,6 @@ export default function Home() {
         </View>
       </TouchableOpacity>
       <StatusBar style="light" />
-    </View>
+    </ContentBackground>
   );
 }

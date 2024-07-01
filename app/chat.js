@@ -23,6 +23,7 @@ import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities/http";
 import SkeletonLoader from "./components/SkeletonLoader";
 import appDayjs from "./utils/date";
+import ContentBackground from "./components/ContentBackground";
 
 export default function Chat() {
   const scrollViewRef = useRef();
@@ -340,7 +341,7 @@ export default function Chat() {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <ContentBackground>
       <Modal
         animationType="slide"
         transparent={true}
@@ -614,7 +615,7 @@ export default function Chat() {
         </View>
       </BottomSheet>
       <StatusBar style="light" />
-    </View>
+    </ContentBackground>
   );
 }
 

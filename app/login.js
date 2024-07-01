@@ -14,6 +14,7 @@ import { storeData, url } from "../utilities";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import ContentBackground from "./components/ContentBackground";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,124 +102,128 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAwareScrollView>
-      <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 40 }}>
-        <Text style={{ color: "#478CCA", fontSize: 36, marginTop: 100 }}>
-          Aho Kwinjirira
-        </Text>
-        <Text
-          style={{
-            color: "#3D576F",
-            fontSize: 20,
-            marginTop: 10,
-            textAlign: "center",
-          }}
-        >
-          Uzuzamo nimero yawe ya telefoni na PIN ubundi winjire.
-        </Text>
-        <View style={{ marginBottom: 20, marginTop: 60, width: "100%" }}>
-          <View
+    <ContentBackground>
+      <KeyboardAwareScrollView>
+        <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 40 }}>
+          <Text style={{ color: "#478CCA", fontSize: 36, marginTop: 100 }}>
+            Aho Kwinjirira
+          </Text>
+          <Text
             style={{
-              display: "flex",
-              flexDirection: "row",
-              borderWidth: 1,
-              borderRadius: 8,
-              borderColor: "#478CCA3D",
-              padding: 15,
-              alignItems: "center",
+              color: "#3D576F",
+              fontSize: 20,
+              marginTop: 10,
+              textAlign: "center",
             }}
           >
-            <Image
-              source={require("../assets/phone.png")}
-              style={{ height: 22, width: 14 }}
-            />
-            <TextInput
-              placeholder="Nimero ya Telefoni (078----)"
-              placeholderTextColor="#3D576F8E"
-              style={{ fontSize: 14, marginLeft: 10, flex: 1 }}
-              keyboardType="numeric"
-              onChangeText={(text) => setPhoneNumber(text)}
-            />
-          </View>
-          {errorBag.phoneNumber == true && (
-            <Text style={{ color: "red", textAlign: "left", marginTop: 2 }}>
-              Tangiza 07 kuri nimero. Igomba kuba igizwe n' imibare icumi.
-            </Text>
-          )}
-        </View>
-        <View style={{ marginBottom: 48, width: "100%" }}>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              borderWidth: 1,
-              borderRadius: 8,
-              borderColor: "#478CCA3D",
-              padding: 15,
-              alignItems: "center",
-            }}
-          >
-            <Image
-              source={require("../assets/key-line.png")}
-              style={{ height: 17, width: 18 }}
-            />
-            <TextInput
-              placeholder="PIN (- - - - -)"
-              placeholderTextColor="#3D576F8E"
-              style={{ fontSize: 14, marginLeft: 10, flex: 1 }}
-              keyboardType="numeric"
-              onChangeText={(text) => setPin(text)}
-              secureTextEntry={true}
-            />
-          </View>
-
-          {errorBag.pin == true && (
-            <Text style={{ color: "red", textAlign: "left", marginTop: 2 }}>
-              PIN igomba kuba igizwe n' imibare itari munsi y' itanu
-            </Text>
-          )}
-
-          <View style={{ marginTop: 20 }}>
-            <TouchableOpacity onPress={handleForgotPin}>
-              <Text
-                style={{ color: "#478CCA", fontSize: 14, textAlign: "right" }}
-              >
-                Wibagiwe PIN?
+            Uzuzamo nimero yawe ya telefoni na PIN ubundi winjire.
+          </Text>
+          <View style={{ marginBottom: 20, marginTop: 60, width: "100%" }}>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                borderWidth: 1,
+                borderRadius: 8,
+                borderColor: "#478CCA3D",
+                paddingHorizontal: 15,
+                alignItems: "center",
+                backgroundColor: "white",
+              }}
+            >
+              <Image
+                source={require("../assets/phone.png")}
+                style={{ height: 22, width: 14 }}
+              />
+              <TextInput
+                placeholder="Nimero ya Telefoni (078----)"
+                placeholderTextColor="#3D576F8E"
+                style={{ fontSize: 14, marginLeft: 10, flex: 1, paddingVertical: 15 }}
+                keyboardType="numeric"
+                onChangeText={(text) => setPhoneNumber(text)}
+              />
+            </View>
+            {errorBag.phoneNumber == true && (
+              <Text style={{ color: "red", textAlign: "left", marginTop: 2 }}>
+                Tangiza 07 kuri nimero. Igomba kuba igizwe n' imibare icumi.
               </Text>
-            </TouchableOpacity>
+            )}
           </View>
+          <View style={{ marginBottom: 48, width: "100%" }}>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                borderWidth: 1,
+                borderRadius: 8,
+                borderColor: "#478CCA3D",
+                paddingHorizontal: 15,
+                alignItems: "center",
+                backgroundColor: "white",
+              }}
+            >
+              <Image
+                source={require("../assets/key-line.png")}
+                style={{ height: 17, width: 18 }}
+              />
+              <TextInput
+                placeholder="PIN (- - - - -)"
+                placeholderTextColor="#3D576F8E"
+                style={{ fontSize: 14, marginLeft: 10, flex: 1, paddingVertical: 15 }}
+                keyboardType="numeric"
+                onChangeText={(text) => setPin(text)}
+                secureTextEntry={true}
+              />
+            </View>
+
+            {errorBag.pin == true && (
+              <Text style={{ color: "red", textAlign: "left", marginTop: 2 }}>
+                PIN igomba kuba igizwe n' imibare itari munsi y' itanu
+              </Text>
+            )}
+
+            <View style={{ marginTop: 20 }}>
+              <TouchableOpacity onPress={handleForgotPin}>
+                <Text
+                  style={{ color: "#478CCA", fontSize: 14, textAlign: "right" }}
+                >
+                  Wibagiwe PIN?
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Button
+            title={
+              isLoading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                "INJIRA"
+              )
+            }
+            backgroundColor="#478CCA"
+            textColor="white"
+            onPress={() => logIn()}
+          />
+          <View style={{ marginTop: 20 }} />
+          <Button
+            title="UBUFASHA"
+            backgroundColor="transparent"
+            textColor="#3D576F"
+            underlineText={true}
+            onPress={() => router.push("/help")}
+          />
+          <View style={{ marginTop: 64 }}></View>
+          <Button
+            title="Subira Inyuma"
+            backgroundColor="transparent"
+            textColor="#3D576F"
+            underlineText={true}
+            onPress={() => router.replace("/")}
+          />
+          <StatusBar style="light" />
+          <Toast />
         </View>
-        <Button
-          title={
-            isLoading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              "INJIRA"
-            )
-          }
-          backgroundColor="#478CCA"
-          textColor="white"
-          onPress={() => logIn()}
-        />
-        <View style={{ marginTop: 20 }} />
-        <Button
-          title="UBUFASHA"
-          backgroundColor="transparent"
-          textColor="#3D576F"
-          underlineText={true}
-          onPress={() => router.push("/help")}
-        />
-        <View style={{ marginTop: 64 }}></View>
-        <Button
-          title="Subira Inyuma"
-          backgroundColor="transparent"
-          textColor="#3D576F"
-          underlineText={true}
-          onPress={() => router.replace("/")}
-        />
-        <StatusBar style="light" />
-        <Toast />
-      </View>
-    </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
+    </ContentBackground>
   );
 }

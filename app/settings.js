@@ -18,6 +18,7 @@ import SelectDropdown from "react-native-select-dropdown";
 import Toast from "react-native-toast-message";
 import * as Updates from "expo-updates";
 import instance from "../utilities/http";
+import ContentBackground from "./components/ContentBackground";
 
 const checkSession = async () => {
   const accessToken = await getData("access_token");
@@ -215,7 +216,7 @@ export default function Settings() {
   }, []);
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ContentBackground>
       <View
         style={{
           width: "100%",
@@ -269,6 +270,7 @@ export default function Settings() {
               borderColor: "#478CCA3D",
               paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <Image
@@ -302,6 +304,7 @@ export default function Settings() {
               borderColor: "#478CCA3D",
               paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <Image
@@ -339,6 +342,7 @@ export default function Settings() {
               borderColor: "#478CCA3D",
               paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <Image
@@ -353,11 +357,13 @@ export default function Settings() {
               buttonStyle={{
                 paddingVertical: 15,
                 flex: 1,
+                backgroundColor: "#FFFFFF",
               }}
               defaultButtonText="Hitamo aho mutuye"
               buttonTextStyle={{
                 color: "#3D576F",
                 textAlign: "left",
+                backgroundColor: "#FFFFFF",
               }}
               defaultValue={district}
             />
@@ -387,6 +393,7 @@ export default function Settings() {
               borderColor: "#478CCA3D",
               paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <Image
@@ -425,6 +432,7 @@ export default function Settings() {
               borderColor: "#478CCA3D",
               paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <Image
@@ -464,6 +472,6 @@ export default function Settings() {
       </View>
       <StatusBar style="light" />
       <Toast />
-    </ScrollView>
+    </ContentBackground>
   );
 }

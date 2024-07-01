@@ -6,6 +6,7 @@ import { useState } from "react";
 import { getData, storeData, url } from "../utilities";
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import ContentBackground from "./components/ContentBackground";
 
 export default function Verify() {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,85 +65,88 @@ export default function Verify() {
 
 
   return (
-    <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 40 }}>
-      <Text style={{ color: "#478CCA", fontSize: 36, marginTop: 100 }}>
-        Umubarebanga
-      </Text>
-      <Text
-        style={{
-          color: "#3D576F",
-          fontSize: 20,
-          marginTop: 10,
-          textAlign: "center",
-        }}
-      >
-        Uzuzamo umubarebanga wohererejwe mu butumwa bugufi.
-      </Text>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          borderWidth: 1,
-          width: "100%",
-          borderRadius: 8,
-          borderColor: "#478CCA3D",
-          padding: 15,
-          alignItems: "center",
-          marginBottom: 20,
-          marginTop: 60,
-        }}
-      >
-        <Image
-          source={require("../assets/key-line.png")}
-          style={{ height: 22, width: 20 }}
-        />
-        <TextInput
-          placeholder="OTP"
-          placeholderTextColor="#3D576F8E"
-          style={{ fontSize: 14, marginLeft: 10, flex: 1 }}
-          keyboardType="numeric"
-          onChangeText={(text) => setOTP(text)}
-        />
-      </View>
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#478CCA",
-          padding: 10,
-          borderRadius: 8,
-          width: "100%",
-          paddingVertical: 15,
-        }}
-        onPress={verifyOTP}
-      >
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#ffffff" />
-        ) : (
-          <Text style={{ color: "white", textAlign: "center" }}>OHEREZA</Text>
-        )}
-      </TouchableOpacity>
-      <View
-        style={{ marginTop: 32 }}
+    <ContentBackground>
+      <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 40 }}>
+        <Text style={{ color: "#478CCA", fontSize: 36, marginTop: 100 }}>
+          Umubarebanga
+        </Text>
+        <Text
+          style={{
+            color: "#3D576F",
+            fontSize: 20,
+            marginTop: 10,
+            textAlign: "center",
+          }}
+        >
+          Uzuzamo umubarebanga wohererejwe mu butumwa bugufi.
+        </Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            borderWidth: 1,
+            width: "100%",
+            borderRadius: 8,
+            borderColor: "#478CCA3D",
+            paddingHorizontal: 15,
+            alignItems: "center",
+            marginBottom: 20,
+            marginTop: 60,
+            backgroundColor: 'white'
+          }}
+        >
+          <Image
+            source={require("../assets/key-line.png")}
+            style={{ height: 22, width: 20 }}
+          />
+          <TextInput
+            placeholder="OTP"
+            placeholderTextColor="#3D576F8E"
+            style={{ fontSize: 14, marginLeft: 10, flex: 1, paddingVertical: 15 }}
+            keyboardType="numeric"
+            onChangeText={(text) => setOTP(text)}
+          />
+        </View>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#478CCA",
+            padding: 10,
+            borderRadius: 8,
+            width: "100%",
+            paddingVertical: 15,
+          }}
+          onPress={verifyOTP}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={{ color: "white", textAlign: "center" }}>OHEREZA</Text>
+          )}
+        </TouchableOpacity>
+        <View
+          style={{ marginTop: 32 }}
 
-      >
-        <Button
-          title="Ntabwo wabonye kode?"
-          backgroundColor="transparent"
-          textColor="#478CCA"
-          underlineText={true}
-          onPress={handleResendCode}
-        />
-      </View>
-      <View style={{ marginTop: 64 }}>
-        <Button
-          title="Subira Inyuma"
-          backgroundColor="transparent"
-          textColor="#3D576F"
-          underlineText={true}
-          onPress={() => router.back()}
-        />
-      </View>
+        >
+          <Button
+            title="Ntabwo wabonye kode?"
+            backgroundColor="transparent"
+            textColor="#478CCA"
+            underlineText={true}
+            onPress={handleResendCode}
+          />
+        </View>
+        <View style={{ marginTop: 64 }}>
+          <Button
+            title="Subira Inyuma"
+            backgroundColor="transparent"
+            textColor="#3D576F"
+            underlineText={true}
+            onPress={() => router.back()}
+          />
+        </View>
 
-      <StatusBar style="dark" />
-    </View>
+        <StatusBar style="dark" />
+      </View>
+    </ContentBackground>
   );
 }

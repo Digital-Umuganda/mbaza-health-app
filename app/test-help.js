@@ -1,6 +1,7 @@
 import React from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { helpData } from "../assets/data/help";
+import ContentBackground from "./components/ContentBackground";
 
 const styles = StyleSheet.create({
   container: {
@@ -32,11 +33,13 @@ const HelpDetail = ({ route }) => {
   const { title, description, notes } = helpData[id];
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.text}>{description}</Text>
-      <Text style={styles.note}>{notes}</Text>
-    </ScrollView>
+    <ContentBackground>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.text}>{description}</Text>
+        <Text style={styles.note}>{notes}</Text>
+      </ScrollView>
+    </ContentBackground>
   );
 };
 

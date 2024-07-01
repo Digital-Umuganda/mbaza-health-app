@@ -13,7 +13,7 @@ const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
 export default function Home() {
   const params = useLocalSearchParams();
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(params?.perPage || 5);
   const [showRecentChats, setShowRecentChats] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
@@ -59,14 +59,29 @@ export default function Home() {
           })
         }
         style={{
-          backgroundColor: "#478CCA14",
+          backgroundColor: "white",
           paddingHorizontal: 20,
           paddingVertical: 15,
+          // border
+          borderBottomWidth: 1,
+          borderBottomColor: "#CADEF0",
         }}
       >
-        <Text selectable={true} style={{ fontSize: 14, color: "#3D576F" }}>
-          {chat.title}
-        </Text>
+        {/* flex items center */}
+        <View style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}>
+          <Text selectable={true} style={{ fontSize: 14, color: "#3D576F" }}>
+            {chat.title}
+          </Text>
+          <View>
+            <Ionicons name="chevron-up" size={24} color="#478CCA" style={{
+              transform: [{ rotate: "90deg" }]
+            }} />
+          </View>
+        </View>
         <View
           style={{
             display: "flex",

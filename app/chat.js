@@ -374,7 +374,8 @@ export default function Chat() {
                 router.replace({
                   pathname: '/home',
                   params: {
-                    showRecentChats: params.showRecentChats
+                    // ...params,
+                    showRecentChats: params.showRecentChats,
                   }
                 })
               }}

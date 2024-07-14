@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import instance from "./http";
 
 export const url = "https://backend-api.umuganda.digital";
 // export const url = "https://bec7-102-22-146-226.ngrok-free.app"
@@ -27,7 +27,7 @@ export const fetchProfile = async () => {
     const accessToken = await getData('access_token');
 
     try {
-        const response = await axios({
+        const response = await instance({
             method: 'get',
             url: `${url}/api/v1/user/profile`,
             headers: {

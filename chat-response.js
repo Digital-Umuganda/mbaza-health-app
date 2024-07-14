@@ -5,8 +5,9 @@ import Markdown from 'react-native-markdown-display';
 import { useEffect, useState } from "react";
 import { downloadAndCacheAudio } from "./utilities/helpers";
 import appDayjs, { dateTimeWithSpaceFormat } from "./app/utils/date";
+import SkeletonLoader from "./app/components/SkeletonLoader";
 
-export default function ChatResponse({ content, isTranslating }) {
+export default function ChatResponse({ content, isTranslating, isLastTranslating }) {
   const [audioResponses, setAudioResponses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -86,6 +87,7 @@ export default function ChatResponse({ content, isTranslating }) {
           {content?.answer}
         </Markdown>
       </View>
+      {isLastTranslating ? <SkeletonLoader /> : null}
     </View>
   );
 }

@@ -326,7 +326,7 @@ export default function Chat() {
       return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
       return <ChatResponse key={index} content={message.message}
-        isTranslating={translating && !message.message?.audio_responses?.length} />
+        isTranslating={translating && !message.message?.audio_responses?.length} isLastTranslating={translating && (messages.length === index + 1)} />
     }
   };
 
@@ -497,7 +497,7 @@ export default function Chat() {
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}
-        {translating && <SkeletonLoader />}
+        {/* {translating && <SkeletonLoader />} */}
       </ScrollView>
       <View
         // onPress={() => router.push("/help")}

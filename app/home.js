@@ -1,9 +1,8 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { fetchProfile } from "../utilities";
 import { useEffect, useState } from "react";
-import instance from "../utilities/http";
+import instance, {fetchProfile} from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
 import appDayjs, { dateTimeWithSpaceFormat } from './utils/date'

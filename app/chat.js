@@ -20,7 +20,7 @@ import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
-import instance, { onLogout } from "../utilities/http";
+import instance, { onLogout } from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
 import appDayjs from "./utils/date";
 import ContentBackground from "./components/ContentBackground";

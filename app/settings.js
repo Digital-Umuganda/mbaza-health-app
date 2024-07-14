@@ -11,13 +11,12 @@ import {
 import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { fetchProfile, getData, getUserProfile, url } from "../utilities";
+import instance, { fetchProfile, getData, getUserProfile, url } from "../utilities";
 import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SelectDropdown from "react-native-select-dropdown";
 import Toast from "react-native-toast-message";
 import * as Updates from "expo-updates";
-import instance from "../utilities/http";
 import ContentBackground from "./components/ContentBackground";
 
 const checkSession = async () => {

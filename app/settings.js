@@ -10,7 +10,7 @@ import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import instance, { fetchProfile, getData, getUserProfile, url } from "../utilities";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SelectDropdown from "react-native-select-dropdown";
 import Toast from "react-native-toast-message";
@@ -26,6 +26,7 @@ const checkSession = async () => {
 };
 
 export default function Settings() {
+  const [isLoadingPin, setLoadingPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [district, setDistrict] = useState();
   const [names, setNames] = useState();
@@ -109,9 +110,9 @@ export default function Settings() {
       }
     }
 
-    setIsLoading(true);
+    isPin ? setLoadingPin(true) : setIsLoading(true);
     const [updateProfile] = await Promise.allSettled(requests);
-    setIsLoading(false);
+    isPin ? setLoadingPin(false) : setIsLoading(false);
 
     if (updateProfile.status == "fulfilled") {
       const { message } = updateProfile.value.data;
@@ -168,13 +169,10 @@ export default function Settings() {
 
     let bag = {};
 
-    if (typeof data.oldPassword != "string" || data.oldPassword.length < 5) {
+    if (typeof data.oldPassword != "string") {
       bag.oldPin = true;
-    }
-
-    if (
-      typeof data.newPassword != "string" ||
-      data.newPassword.length < 5 ||
+    } else if (
+      typeof data.newPassword != "string" || data.newPassword.length < 6 ||
       data.newPassword == data.oldPassword
     ) {
       bag.newPin = true;
@@ -455,13 +453,13 @@ export default function Settings() {
             </View>
             {errorBag.newPin == true && (
               <Text style={{ color: "red", textAlign: "left", marginTop: 2 }}>
-                PIN nshya igomba kuba igizwe n' imibare itari munsi y' itanu kandi
+                PIN nshya igomba kuba igizwe n' imibare itari munsi y' itandatu kandi
                 idasa na PIN wakoresheje.
               </Text>
             )}
           </View>
           <Button
-            loading={newPin && oldPin && isLoading}
+            loading={newPin && oldPin && isLoadingPin}
             onPress={() => updateUserCredentials(true)}
             title="EMEZA"
             backgroundColor="#478CCA"

@@ -2,11 +2,13 @@ import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useEffect, useState } from "react";
-import instance, {fetchProfile} from "../utilities";
+import instance, { fetchProfile } from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
 import appDayjs, { dateTimeWithSpaceFormat } from './utils/date'
 import ContentBackground from "./components/ContentBackground";
+import { FontAwesome } from '@expo/vector-icons';
+
 
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
@@ -157,10 +159,7 @@ export default function Home() {
                 width: 51,
               }}
             >
-              <Image
-                style={{ width: 20.43, height: 20.43 }}
-                source={require("../assets/person-green.png")}
-              />
+              <FontAwesome name="user" size={24} color="black" />
             </View>
             <Text
               style={{
@@ -198,10 +197,7 @@ export default function Home() {
                 width: 51,
               }}
             >
-              <Image
-                style={{ width: 9.78, height: 17.39 }}
-                source={require("../assets/question_outline.png")}
-              />
+              <FontAwesome name="question-circle" size={24} color="black" />
             </View>
             <Text
               style={{

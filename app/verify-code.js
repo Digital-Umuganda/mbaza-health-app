@@ -13,6 +13,7 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { storeData, url } from "../utilities";
 import Button from "../Button";
+import ContentBackground from "./components/ContentBackground";
 
 const VerifyCodeScreen = () => {
   const params = useLocalSearchParams();
@@ -100,7 +101,7 @@ const VerifyCodeScreen = () => {
     }
   }
   return (
-    <>
+    <ContentBackground>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Text
           style={{
@@ -128,10 +129,10 @@ const VerifyCodeScreen = () => {
           style={{
             borderWidth: 1,
             borderColor: "#ccc",
-            padding: 10,
-            paddingVertical: 15,
+            padding: 15,
             borderRadius: 8,
             width: "80%",
+            backgroundColor: 'white'
           }}
           inputMode="numeric"
           value={verificationCode}
@@ -159,8 +160,9 @@ const VerifyCodeScreen = () => {
               borderWidth: 1,
               borderRadius: 8,
               borderColor: "#478CCA3D",
-              padding: 15,
+              paddingHorizontal: 15,
               alignItems: "center",
+              backgroundColor: 'white'
             }}
           >
             <Image
@@ -170,7 +172,7 @@ const VerifyCodeScreen = () => {
             <TextInput
               placeholder="PIN Shya"
               placeholderTextColor="#3D576F8E"
-              style={{ fontSize: 14, marginLeft: 10, flex: 1 }}
+              style={{ fontSize: 14, marginLeft: 10, flex: 1, paddingVertical: 15 }}
               keyboardType="numeric"
               onChangeText={setPin}
               secureTextEntry={false}
@@ -225,7 +227,7 @@ const VerifyCodeScreen = () => {
       </View>
       <StatusBar style="light" />
       <Toast />
-    </>
+    </ContentBackground>
   );
 };
 

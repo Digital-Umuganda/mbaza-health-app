@@ -20,9 +20,10 @@ import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
-import instance, { onLogout } from "../utilities/http";
+import instance, { onLogout } from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
 import appDayjs from "./utils/date";
+import ContentBackground from "./components/ContentBackground";
 
 export default function Chat() {
   const scrollViewRef = useRef();
@@ -325,7 +326,7 @@ export default function Chat() {
       return <ChatRequest key={index} content={message.message} />;
     } else if (message.type == "response") {
       return <ChatResponse key={index} content={message.message}
-        isTranslating={translating && !message.message?.audio_responses?.length} />
+        isTranslating={translating && !message.message?.audio_responses?.length} isLastTranslating={translating && (messages.length === index + 1)} />
     }
   };
 
@@ -340,7 +341,7 @@ export default function Chat() {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <ContentBackground>
       <Modal
         animationType="slide"
         transparent={true}
@@ -373,7 +374,8 @@ export default function Chat() {
                 router.replace({
                   pathname: '/home',
                   params: {
-                    showRecentChats: params.showRecentChats
+                    // ...params,
+                    showRecentChats: params.showRecentChats,
                   }
                 })
               }}
@@ -495,7 +497,7 @@ export default function Chat() {
       >
         <ChatResponse content={{ answer: "Muraho! Mbafashe nte?" }} />
         {renderMessages()}
-        {translating && <SkeletonLoader />}
+        {/* {translating && <SkeletonLoader />} */}
       </ScrollView>
       <View
         // onPress={() => router.push("/help")}
@@ -614,7 +616,7 @@ export default function Chat() {
         </View>
       </BottomSheet>
       <StatusBar style="light" />
-    </View>
+    </ContentBackground>
   );
 }
 

@@ -12,6 +12,7 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { url } from "../utilities";
 import Button from "../Button";
+import ContentBackground from "./components/ContentBackground";
 
 const ForgotPinScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +64,7 @@ const ForgotPinScreen = () => {
     }
   };
   return (
-    <>
+    <ContentBackground>
       <View
         style={{
           flex: 1,
@@ -100,6 +101,7 @@ const ForgotPinScreen = () => {
             paddingVertical: 15,
             borderRadius: 8,
             width: "80%",
+            backgroundColor: "white",
           }}
           inputMode="tel"
           value={phoneNumber}
@@ -159,7 +161,7 @@ const ForgotPinScreen = () => {
       </View>
       <StatusBar style="light" />
       <Toast />
-    </>
+    </ContentBackground>
   );
 };
 

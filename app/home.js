@@ -1,18 +1,20 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { fetchProfile } from "../utilities";
 import { useEffect, useState } from "react";
-import instance from "../utilities/http";
+import instance, { fetchProfile } from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { Ionicons } from "@expo/vector-icons";
 import appDayjs, { dateTimeWithSpaceFormat } from './utils/date'
+import ContentBackground from "./components/ContentBackground";
+import { FontAwesome } from '@expo/vector-icons';
+
 
 const arr5 = Array.from({ length: 5 }, (_, i) => i);
 
 export default function Home() {
   const params = useLocalSearchParams();
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(params?.perPage || 5);
   const [showRecentChats, setShowRecentChats] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState([]);
@@ -58,14 +60,29 @@ export default function Home() {
           })
         }
         style={{
-          backgroundColor: "#478CCA14",
+          backgroundColor: "white",
           paddingHorizontal: 20,
           paddingVertical: 15,
+          // border
+          borderBottomWidth: 1,
+          borderBottomColor: "#CADEF0",
         }}
       >
-        <Text selectable={true} style={{ fontSize: 14, color: "#3D576F" }}>
-          {chat.title}
-        </Text>
+        {/* flex items center */}
+        <View style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}>
+          <Text selectable={true} style={{ fontSize: 14, color: "#3D576F" }}>
+            {chat.title}
+          </Text>
+          <View>
+            <Ionicons name="chevron-up" size={24} color="#478CCA" style={{
+              transform: [{ rotate: "90deg" }]
+            }} />
+          </View>
+        </View>
         <View
           style={{
             display: "flex",
@@ -107,7 +124,7 @@ export default function Home() {
     );
   };
   return (
-    <View style={{ flex: 1 }}>
+    <ContentBackground>
       <ScrollView style={{ paddingHorizontal: 20, marginBottom: 80 }}>
         <View
           style={{
@@ -142,10 +159,7 @@ export default function Home() {
                 width: 51,
               }}
             >
-              <Image
-                style={{ width: 20.43, height: 20.43 }}
-                source={require("../assets/person-green.png")}
-              />
+              <FontAwesome name="user" size={24} color="black" />
             </View>
             <Text
               style={{
@@ -183,10 +197,7 @@ export default function Home() {
                 width: 51,
               }}
             >
-              <Image
-                style={{ width: 9.78, height: 17.39 }}
-                source={require("../assets/question_outline.png")}
-              />
+              <FontAwesome name="question-circle" size={24} color="black" />
             </View>
             <Text
               style={{
@@ -322,6 +333,6 @@ export default function Home() {
         </View>
       </TouchableOpacity>
       <StatusBar style="light" />
-    </View>
+    </ContentBackground>
   );
 }

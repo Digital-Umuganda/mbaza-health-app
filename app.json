@@ -2,15 +2,15 @@
   "expo": {
     "name": "Mbaza Health",
     "slug": "mbaza-health-app",
-    "version": "2.0.1",
+    "version": "2.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "mbaza-health",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#EAF0F5"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -19,6 +19,7 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 5,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

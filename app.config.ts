@@ -17,6 +17,11 @@ const config: ExpoConfig = {
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
+    infoPlist: {
+      NSMicrophoneUsageDescription:
+        "This app uses the microphone to record audio.",
+      UIBackgroundModes: ["audio"],
+    },
   },
   android: {
     versionCode: 5,
@@ -40,6 +45,21 @@ const config: ExpoConfig = {
       {
         microphonePermission:
           "Allow $(PRODUCT_NAME) to access your microphone.",
+      },
+    ],
+    [
+      "expo-media-library",
+      {
+        photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
+        savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
+        isAccessMediaLocationEnabled: true,
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission:
+          "Allow $(PRODUCT_NAME) to use your location.",
       },
     ],
   ],

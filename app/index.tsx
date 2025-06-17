@@ -1,14 +1,14 @@
-import { Image, ImageBackground, StyleSheet, View } from "react-native";
-import Button from "@/Button";
-import { StatusBar } from "expo-status-bar";
+import Button from "@/components/ui/Button";
 import { router } from "expo-router";
-import { getData } from "../utilities";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { Image, ImageBackground, StyleSheet, View } from "react-native";
+import { getData } from "../utilities";
 
 const checkSession = async () => {
   const accessToken = await getData("access_token");
   if (accessToken !== null) {
-    router.replace("/home");
+    router.replace("/(tabs)");
   }
 };
 
@@ -19,14 +19,12 @@ export default function Index() {
 
   return (
     <ImageBackground
-      source={require('../assets/images/background.jpg')}  // replace with your image URL
+      source={require("../assets/images/background.jpg")} // replace with your image URL
       style={styles.background}
     >
-      <View
-        style={styles.container}
-      >
+      <View style={styles.container}>
         <Image
-          source={require('../assets/images/app_name.png')} // replace with your logo path
+          source={require("../assets/images/app_name.png")} // replace with your logo path
           style={styles.logo}
         />
         <Button
@@ -60,16 +58,16 @@ export default function Index() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    alignItems: 'center',
+    resizeMode: "cover",
+    justifyContent: "center",
+    alignItems: "center",
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 40,
-    position: 'relative',
+    position: "relative",
   },
   logo: {
     width: 230, // Adjust the width as needed
@@ -77,7 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
   helpButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 100,
   },
 });

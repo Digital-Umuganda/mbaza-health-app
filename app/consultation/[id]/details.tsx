@@ -93,7 +93,7 @@ export default function ConversationDetailsScreen() {
 
           <View style={styles.audioSection}>
             <Text style={styles.infoLabel}>Ikiganiro:</Text>
-            <AudioPlayer audioUri={conversation?.audio_url || ""} />
+            <AudioPlayer audioSource={conversation?.audio_url || ""} />
           </View>
         </View>
 

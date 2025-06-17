@@ -60,7 +60,7 @@ export default function VoiceChatScreen() {
           />
         ) : (
           <AudioPlayer
-            audioUri={question.value}
+            audioSource={question.value}
             onDelete={resetConversation}
             onNext={() => {
               router.replace("/consultation/1");

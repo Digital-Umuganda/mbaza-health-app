@@ -18,7 +18,7 @@ import ChatRequest from "../chat-request";
 import { getData, url } from "../utilities";
 import { fetch } from "../utilities/react-native-fetch-api/fetch";
 import RecordAudio from "./components/RecordAudio";
-import AudioPlayList from "./components/AudioPlayList";
+import AudioPlayer from "./components/AudioPlayer";
 import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities";
 import SkeletonLoader from "./components/SkeletonLoader";
@@ -527,7 +527,7 @@ export default function Chat() {
         >
           {recordUrl ? (
             <>
-              <AudioPlayList playlist={[recordUrl]} />
+              <AudioPlayer audioUri={recordUrl} />
               <TouchableOpacity
                 onPress={() => setRecordUrl(null)}
                 style={{

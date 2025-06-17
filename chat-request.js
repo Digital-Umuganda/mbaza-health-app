@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Text, View } from "react-native";
 import { url } from "./utilities";
-import AudioPlayList from "./app/components/AudioPlayList";
+import AudioPlayer from "./app/components/AudioPlayer";
 import appDayjs, { dateTimeWithSpaceFormat } from "./app/utils/date";
 
 export default function ChatRequest({ content }) {
@@ -50,7 +50,7 @@ export default function ChatRequest({ content }) {
       <View style={{ padding: 15 }}>
         {audio ? (
           <>
-            <AudioPlayList playlist={[audio]} />
+            <AudioPlayer audioUri={audio} />
             {/* {content.answer ? (
               <Text
                 style={{

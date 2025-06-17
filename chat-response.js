@@ -1,35 +1,13 @@
 import { ActivityIndicator, Text, View } from "react-native";
-import AudioPlayList from "./app/components/AudioPlayList";
+import AudioPlayer from "./app/components/AudioPlayer";
 import { url } from "./utilities";
 import Markdown from 'react-native-markdown-display';
-import { useEffect, useState } from "react";
-import { downloadAndCacheAudio } from "./utilities/helpers";
 import appDayjs, { dateTimeWithSpaceFormat } from "./app/utils/date";
 import SkeletonLoader from "./app/components/SkeletonLoader";
 
 export default function ChatResponse({ content, isTranslating, isLastTranslating }) {
-  const [audioResponses, setAudioResponses] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const audioUrls = content.audio_responses?.map((item) => `${url}/uploads/${item}`);
-
-  const downloadAudios = async () => {
-    setIsLoading(true);
-    const audioFiles = (await Promise.all(
-      content.audio_responses.map(async (item) => {
-        return await downloadAndCacheAudio(`${url}/uploads/${item}`);
-      })
-    )).filter((item) => item !== null);
-    setIsLoading(false);
-    setAudioResponses(audioFiles);
-  }
-
-  // useEffect(() => {
-  //   if (content.audio_responses?.length) {
-  //     downloadAudios();
-  //   }
-  // }, [content.audio_responses])
-
 
   return (
     <View
@@ -72,9 +50,9 @@ export default function ChatResponse({ content, isTranslating, isLastTranslating
             {!!content &&
               !!content?.created_at && appDayjs(content.created_at).format(dateTimeWithSpaceFormat)}
           </Text>
-          {isTranslating || isLoading ? <ActivityIndicator size="small" color="#3D576F" />
+          {isTranslating ? <ActivityIndicator size="small" color="#3D576F" />
             : audioUrls?.length ?
-              <AudioPlayList playlist={audioUrls} noSlider /> : null}
+              <AudioPlayer audioUri={audioUrls[0]} noSlider /> : null}
         </View>
       </View>
       <View style={{ padding: 15 }}>

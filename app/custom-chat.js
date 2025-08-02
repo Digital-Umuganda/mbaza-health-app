@@ -7,6 +7,7 @@ import Button from "../Button";
 import { StatusBar } from "expo-status-bar";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
+import { validateNumeric, validateText, sanitizeInput } from "../utilities/validation";
 import SelectDropdown from "react-native-select-dropdown";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Path, Svg } from "react-native-svg";
@@ -30,21 +31,18 @@ export default function CustomChat() {
     if (!age?.length) {
       errors.age = "Andika imyaka y'umurwayi";
     }
-    if (!weight?.length) {
-      errors.weight = "Andika ibiro by'umurwayi";
-    } else if (isNaN(weight)) {
-      errors.weight = "Ibiro by'umurwayi birimo amakosa";
+    if (!validateNumeric(weight, 1, 500)) {
+      errors.weight = "Andika ibiro by'umurwayi (1-500 kg)";
     }
-    if (!height?.length) {
-      errors.height = "Andika uburebure bw'umurwayi";
-    } else if (isNaN(height)) {
-      errors.height = "Uburebure bw'umurwayi birimo amakosa";
+    if (!validateNumeric(height, 50, 250)) {
+      errors.height = "Andika uburebure bw'umurwayi (50-250 cm)";
     }
     if (!disease?.length) {
       errors.disease = "Hitamo indwara y'umurwayi";
     }
 
-    if (!question?.length) {
+    const questionValidation = validateText(question, 1000);
+    if (!questionValidation.isValid) {
       errors.question = "Andika ikibazo cyawe hano";
     }
 

@@ -21,6 +21,7 @@ import RecordAudio from "./components/RecordAudio";
 import AudioPlayList from "./components/AudioPlayList";
 import { Ionicons } from "@expo/vector-icons";
 import instance, { onLogout } from "../utilities";
+import Toast from "react-native-toast-message";
 import SkeletonLoader from "./components/SkeletonLoader";
 import appDayjs from "./utils/date";
 import ContentBackground from "./components/ContentBackground";
@@ -47,7 +48,7 @@ export default function Chat() {
   }, [params]);
 
   useEffect(() => {
-    scrollViewRef.current.scrollToEnd({ animated: true })
+    scrollViewRef.current?.scrollToEnd({ animated: true })
 
   }, [messages, translating])
 
@@ -96,11 +97,11 @@ export default function Chat() {
     setTranslating(true);
     await instance(config)
       .then(function (response) {
-        // console.log({ data: response.data });
+
         // setChats(response.data);
       })
       .catch(function (error) {
-        console.log(error);
+        // Error handling - log removed for production
       }).finally(() => {
         setTranslating(false);
         if (params?.message) {
@@ -111,7 +112,7 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    navigation.addListener("beforeRemove", (e) => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       if ((params.hasFeedback === "false") && chatId) {
         e.preventDefault();
         setModalVisible(true);
@@ -120,10 +121,8 @@ export default function Chat() {
       }
     });
 
-    return () => {
-      navigation.removeListener("beforeRemove");
-    };
-  }, [navigation, params, chatId]);
+    return unsubscribe;
+  }, [navigation, params.hasFeedback, chatId]);
 
   // ref
   const bottomSheetRef = useRef(null);
@@ -305,7 +304,12 @@ export default function Chat() {
 
       await readChunk();
     } catch (error) {
-      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: "Chat Error",
+        text2: "Failed to send message. Please try again.",
+        position: "bottom",
+      });
     } finally {
       setTranslating(false);
     }

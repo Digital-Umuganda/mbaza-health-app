@@ -29,7 +29,15 @@ export default function Verify() {
           router.push("/home")
         );
       })
-      .catch(function (error) { })
+      .catch(function (error) {
+        const message = error?.response?.data?.message || error?.message;
+        Toast.show({
+          type: "error",
+          text1: "Verification Failed",
+          text2: message,
+          position: "bottom",
+        });
+      })
       .finally(() => setIsLoading(false));
   };
 

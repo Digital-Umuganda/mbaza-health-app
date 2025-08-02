@@ -11,6 +11,7 @@ import Button from "../Button";
 import { router } from "expo-router";
 import { useState } from "react";
 import { storeData, url } from "../utilities";
+import { validatePhoneNumber, validatePin, sanitizeInput } from "../utilities/validation";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -36,8 +37,8 @@ export default function Login() {
     setErrorBag({});
 
     const data = {
-      username: phoneNumber,
-      password: pin,
+      username: sanitizeInput(phoneNumber),
+      password: sanitizeInput(pin),
     };
 
     if (data.username.startsWith("0")) {
@@ -71,26 +72,16 @@ export default function Login() {
   };
 
   const validate = () => {
-    const data = {
-      username: phoneNumber,
-      password: pin,
-    };
+    const sanitizedPhone = sanitizeInput(phoneNumber);
+    const sanitizedPin = sanitizeInput(pin);
 
     let bag = {};
 
-    if (
-      !data?.username ||
-      !data.username.startsWith("07") ||
-      data.username.length !== 10
-    ) {
+    if (!validatePhoneNumber(sanitizedPhone)) {
       bag.phoneNumber = true;
     }
 
-    if (
-      data?.password == null ||
-      typeof data.password != "string" ||
-      data.password.length < 5
-    ) {
+    if (!validatePin(sanitizedPin)) {
       bag.pin = true;
     }
 

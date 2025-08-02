@@ -6,6 +6,7 @@ import SelectDropdown from "react-native-select-dropdown";
 import axios from "axios";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { storeData, url } from "../utilities";
+import { validatePhoneNumber, validatePin, validateName, sanitizeInput } from "../utilities/validation";
 import Toast from "react-native-toast-message";
 import ContentBackground from "./components/ContentBackground";
 
@@ -36,10 +37,10 @@ export default function Signup() {
     setErrorBag({});
 
     const data = {
-      name: names,
-      phone_number: phoneNumber,
-      address: district,
-      password: pin,
+      name: sanitizeInput(names),
+      phone_number: sanitizeInput(phoneNumber),
+      address: sanitizeInput(district),
+      password: sanitizeInput(pin),
     };
 
     if (data.phone_number.startsWith("0")) {
@@ -69,40 +70,26 @@ export default function Signup() {
   };
 
   const validate = () => {
-    const data = {
-      name: names,
-      phone_number: phoneNumber,
-      address: district,
-      password: pin,
-    };
+    const sanitizedPhone = sanitizeInput(phoneNumber);
+    const sanitizedPin = sanitizeInput(pin);
+    const sanitizedName = sanitizeInput(names);
+    const sanitizedDistrict = sanitizeInput(district);
 
     let bag = {};
 
-    if (
-      !data?.phone_number ||
-      !data.phone_number.startsWith("07") ||
-      data.phone_number.length !== 10
-    ) {
+    if (!validatePhoneNumber(sanitizedPhone)) {
       bag.phoneNumber = true;
     }
 
-    if (
-      data?.password == null ||
-      typeof data.password != "string" ||
-      data.password.length < 5
-    ) {
+    if (!validatePin(sanitizedPin)) {
       bag.pin = true;
     }
 
-    if (data?.address == null || typeof data.address != "string") {
+    if (!sanitizedDistrict || sanitizedDistrict.length < 2) {
       bag.district = true;
     }
 
-    if (
-      data?.name == null ||
-      typeof data.name != "string" ||
-      data.name?.trim()?.length == 0
-    ) {
+    if (!validateName(sanitizedName)) {
       bag.names = true;
     }
 

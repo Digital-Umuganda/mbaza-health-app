@@ -160,21 +160,21 @@ export default class AudioPlayList extends React.Component {
       }
     } else {
       if (status.error) {
-        console.log(`FATAL PLAYER ERROR: ${status.error}`);
+        // Fatal player error - log removed for production
       }
     }
   };
 
   _onLoadStart = () => {
-    console.log(`ON LOAD START`);
+    // Audio load start - log removed for production
   };
 
   _onLoad = (status) => {
-    console.log(`ON LOAD : ${JSON.stringify(status)}`);
+    // Audio loaded - log removed for production
   };
 
   _onError = (error) => {
-    console.log(`ON ERROR : ${error}`);
+    // Audio error - log removed for production
   };
 
   _onReadyForDisplay = (event) => {

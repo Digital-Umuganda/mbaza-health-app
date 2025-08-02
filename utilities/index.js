@@ -3,7 +3,6 @@ import axios from "axios";
 import { router } from "expo-router";
 
 export const url = "https://backend-api.umuganda.digital";
-// export const url = "https://bec7-102-22-146-226.ngrok-free.app"
 
 export const onLogout = async () => {
   await AsyncStorage.clear();
@@ -30,7 +29,7 @@ instance.interceptors.request.use(async (config) => {
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response.status === 401) {
+    if (error.response && error.response.status === 401) {
       await onLogout();
     }
     return Promise.reject(error);
@@ -42,8 +41,7 @@ export const storeData = async (key, value) => {
     try {
         await AsyncStorage.setItem(key, value);
     } catch (e) {
-        // saving error
-        console.warn({ origin: 'AsyncStorage', error: e })
+        // saving error - log removed for production
     }
 };
 
@@ -52,8 +50,7 @@ export const getData = async (key) => {
         const value = await AsyncStorage.getItem(key);
         return value;
     } catch (e) {
-        // error reading value
-        console.warn({ origin: 'AsyncStorage', error: e })
+        // error reading value - log removed for production
     }
 };
 
@@ -73,7 +70,7 @@ export const fetchProfile = async () => {
         storeData('profile', JSON.stringify(response.data))
         return response.data;
     } catch (error) {
-        console.warn({ error })
+        // Profile fetch error - log removed for production
     }
 }
 

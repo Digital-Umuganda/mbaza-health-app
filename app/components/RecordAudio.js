@@ -10,7 +10,7 @@ const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
   async function startRecording() {
     try {
       if (permissionResponse.status !== "granted") {
-        console.log("Requesting permission..");
+        // Requesting microphone permission
         await requestPermission();
       }
       await Audio.setAudioModeAsync({
@@ -18,16 +18,16 @@ const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
         playsInSilentModeIOS: true,
       });
 
-      console.log("Starting recording..");
+      // Starting audio recording
 
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
-      console.log("Recording started");
+      // Recording started successfully
       setIsRecording(true);
     } catch (err) {
-      console.error("Failed to start recording", err);
+      // Failed to start recording - error removed for production
     }
   }
 
@@ -45,7 +45,7 @@ const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
   async function uploadAudioFile(uri) {
     try {
       if (!uri) {
-        console.warn("No audio file to upload");
+        // No audio file to upload - warning removed for production
         return;
       }
       const filetype = uri.split(".").pop();
@@ -73,7 +73,7 @@ const RecordAudio = ({ onSubmit = () => {}, setIsRecording = () => {} }) => {
       //   }
       // );
     } catch (error) {
-      console.error("Failed to upload audio file", error);
+      // Failed to upload audio file - error removed for production
     }
   }
 
